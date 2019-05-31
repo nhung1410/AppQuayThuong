@@ -10,7 +10,6 @@
 	<classpathentry kind="lib" path="C:/Users/admin/Downloads/poi-4.1.0/poi-4.1.0.jar"/>
 	<classpathentry kind="lib" path="C:/Users/admin/Downloads/poi-4.1.0/poi-ooxml-4.1.0.jar"/>
 	<classpathentry kind="lib" path="C:/Users/admin/Downloads/poi-4.1.0/poi-ooxml-schemas-4.1.0.jar"/>
-	<classpathentry kind="lib" path="C:/Users/admin/Downloads/ExcelHelper/ExcelHelper.java"/>
 	<classpathentry kind="lib" path="C:/Users/admin/Downloads/poi-4.1.0/lib/activation-1.1.1.jar"/>
 	<classpathentry kind="lib" path="C:/Users/admin/Downloads/poi-4.1.0/lib/commons-codec-1.12.jar"/>
 	<classpathentry kind="lib" path="C:/Users/admin/Downloads/poi-4.1.0/lib/commons-collections4-4.3.jar"/>

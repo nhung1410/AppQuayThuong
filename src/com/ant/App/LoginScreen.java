@@ -7,9 +7,13 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.border.EmptyBorder;
+import com.ant.entities.*;
 
+import org.apache.commons.codec.binary.StringUtils;
+import org.apache.poi.util.StringUtil;
 import org.omg.CORBA.PUBLIC_MEMBER;
 
+import javax.sound.sampled.Line;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -19,7 +23,20 @@ import javax.swing.JDialog;
 
 import java.awt.event.ActionListener;
 import java.beans.Visibility;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Array;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.stream.Stream;
 import java.awt.event.ActionEvent;
 import java.awt.Choice;
 import com.toedter.components.JSpinField;
@@ -41,6 +58,7 @@ public class LoginScreen extends JFrame {
 				try {
 					LoginScreen frame = new LoginScreen();
 					frame.setVisible(true);
+
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -51,6 +69,65 @@ public class LoginScreen extends JFrame {
 	/**
 	 * Create the frame.
 	 */
+	private void login() {
+		FileReader fr = null;
+		BufferedReader br = null;
+		String str = null;
+	
+//		1,nhung,112233,nhung,hn,10/05/2019
+		try {
+
+			fr = new FileReader("Login.txt");
+			br = new BufferedReader(fr);
+
+			while ((str = br.readLine()) != null) {
+			
+				String[] token = str.split(",");
+
+				if(token[1].equals(txtUserName.getText())&& token[2].equals(txtPassword.getText()) ) {
+					try {
+						User info = new User();
+						info.setId(Integer.parseInt(token[0]));
+						info.setUserName(token[1]);
+						info.setPassword(token[2]);
+						info.setName(token[3]);
+						info.setAddress(token[4]);
+						info.setDateOfBirth(token[5]);
+						
+						DashBroadScreen broadScreen = new DashBroadScreen(info);
+						broadScreen.setVisible(true);
+						
+						setVisible(false);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+				}
+			if(txtUserName.getText().equals("superadmin") && txtPassword.getText().equals("password")) {
+				setVisible(false);
+				AdminScreen adminScreen = new AdminScreen();
+				adminScreen.setVisible(true);
+			}
+			else{
+			
+			}
+			
+
+			
+
+			// all code
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			try {
+				br.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 	public LoginScreen() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 400, 300);
@@ -71,7 +148,7 @@ public class LoginScreen extends JFrame {
 		txtUserName.setBounds(135, 60, 211, 22);
 		LoginPanel.add(txtUserName);
 		txtUserName.setColumns(10);
-		
+
 		JLabel lblUserWarning = new JLabel("");
 		lblUserWarning.setFont(new Font("Dialog", Font.ITALIC, 12));
 		lblUserWarning.setForeground(Color.RED);
@@ -82,44 +159,37 @@ public class LoginScreen extends JFrame {
 		txtPassword.setBounds(135, 107, 211, 22);
 		LoginPanel.add(txtPassword);
 		txtPassword.setColumns(10);
-		
+
 		JLabel lblPasswarning = new JLabel("");
 		lblPasswarning.setFont(new Font("Dialog", Font.ITALIC, 12));
 		lblPasswarning.setForeground(Color.RED);
 		lblPasswarning.setBounds(135, 130, 211, 16);
 		LoginPanel.add(lblPasswarning);
-
+		
 		JButton btnLogin = new JButton("Login");
 		btnLogin.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				String userName = txtUserName.getText();
-				String password = txtPassword.getText();
-				if (txtUserName.getText().equals("username") && txtPassword.getText().equals("password")) {
-					try {
-						DashBroadScreen broadScreen = new DashBroadScreen();
-						broadScreen.setVisible(true);
-						setVisible(false);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-					LoginPanel.updateUI();
-				} else if ((txtPassword.getText().length() > 0) && (txtUserName.getText().length() >0) ) {
-					if (!txtUserName.getText().equals("username")) {
-						lblUserWarning.setText("Wrong username. Try again.");
-					} else {
-						lblPasswarning.setText("Wrong password. Try again.");
-					}
-					
-
-				} else {
-					if(txtUserName.getText().equals("")) 
-						lblUserWarning.setText("Enter user name");
-					
-					else
-						
-						lblPasswarning.setText("Enter Password");
-				}
 				
+				
+				login();
+					
+					LoginPanel.updateUI();
+//			 if ((txtPassword.getText().length() > 0) && (txtUserName.getText().length() > 0)) {
+//					if (!txtUserName.getText().equals("username")) {
+//						lblUserWarning.setText("Wrong username. Try again.");
+//					} else {
+//						lblPasswarning.setText("Wrong password. Try again.");
+//					}
+//
+//				} else {
+//					if (txtUserName.getText().equals(""))
+//						lblUserWarning.setText("Enter user name");
+//
+//					else
+//
+//						lblPasswarning.setText("Enter Password");
+//				}
+
 			}
 		});
 
@@ -137,9 +207,6 @@ public class LoginScreen extends JFrame {
 		});
 		btnRegiser.setBounds(209, 158, 89, 25);
 		LoginPanel.add(btnRegiser);
-		
-		
-		
-		
+
 	}
 }

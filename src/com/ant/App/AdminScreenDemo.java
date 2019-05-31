@@ -41,6 +41,9 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.awt.event.ActionEvent;
 import javax.swing.JTextField;
@@ -53,11 +56,15 @@ import java.awt.event.MouseEvent;
 
 import java.io.*;
 
-public class AdminScreen extends JFrame {
+public class AdminScreenDemo extends JFrame {
 
+	Iterator<Row> rowIterator;
+	Row rowLabelHeader;
 	private JPanel contentPane;
 
+	public JTextField textField;
 	public DefaultTableModel model;
+	private int heigh = 5;
 
 	/**
 	 * Launch the application.
@@ -66,7 +73,7 @@ public class AdminScreen extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					AdminScreen frame = new AdminScreen();
+					AdminScreenDemo frame = new AdminScreenDemo();
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -79,7 +86,8 @@ public class AdminScreen extends JFrame {
 	 * Create the frame.
 	 */
 
-	public AdminScreen() {
+	public  AdminScreenDemo() {
+
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 803, 697);
 		contentPane = new JPanel();
@@ -88,14 +96,20 @@ public class AdminScreen extends JFrame {
 		contentPane.setLayout(null);
 
 		JMenuBar menuBar = new JMenuBar();
-		menuBar.setBounds(0, 0, 132, 26);
+		menuBar.setBounds(0, 0, 785, 26);
 		contentPane.add(menuBar);
 
-		JMenuItem mnEmployeeList = new JMenuItem("Employee ");
+		JMenu mnEmployeeList = new JMenu("Employee ");
 		menuBar.add(mnEmployeeList);
 
-		JMenuItem mnEditPrize = new JMenuItem("Prize");
+		JMenuItem showList = new JMenuItem("Show list");
+		mnEmployeeList.add(showList);
+
+		JMenu mnEditPrize = new JMenu("Prize");
 		menuBar.add(mnEditPrize);
+
+		JMenuItem openPrizePanel = new JMenuItem("Edit");
+		mnEditPrize.add(openPrizePanel);
 
 		JPanel Listpanel = new JPanel();
 		Listpanel.setBounds(0, 39, 785, 611);
@@ -107,10 +121,10 @@ public class AdminScreen extends JFrame {
 		Listpanel.add(panel);
 		panel.setLayout(null);
 
-		JTextField txtUrl = new JTextField();
-		txtUrl.setBounds(204, 13, 452, 30);
-		panel.add(txtUrl);
-		txtUrl.setColumns(10);
+		textField = new JTextField();
+		textField.setBounds(158, 14, 387, 22);
+		panel.add(textField);
+		textField.setColumns(10);
 
 		List<User> listUsers = new ArrayList<>();
 		model = new DefaultTableModel();
@@ -134,45 +148,98 @@ public class AdminScreen extends JFrame {
 
 					try {
 						FileInputStream fis = new FileInputStream(new File(excelPath));
-						txtUrl.setText(excelPath);
-						@SuppressWarnings("resource")
 						XSSFWorkbook workbook = new XSSFWorkbook(fis);
 						Sheet sheet = workbook.getSheetAt(0);
-						for (Cell cell : sheet.getRow(0)) {
-							model.addColumn(cell.getStringCellValue());
-
-						}
-
-						for (Row row : sheet) {
-							int rowNum = row.getRowNum();
-							if (rowNum == 0) {
-
-							} else {
-								int i = 0;
-								Vector data = new Vector<>();
-								for (Cell cell : row) {
-									data.add(i, cell.getStringCellValue());
-									i++;
-								}
-								model.addRow(data);
-
+						rowIterator = sheet.iterator();
+						int i = 1;
+						while (rowIterator.hasNext()) {
+							Row row = rowIterator.next();
+							// Get header for mapDataFilter
+							Iterator<Cell> cellIterator = row.cellIterator();
+							while (cellIterator.hasNext()) {
+								Cell cell = cellIterator.next();
+								String cellValue = cell.getStringCellValue();
+								model.addColumn(cellValue);
+								String abc;
 							}
-
+							i++;
+							continue;
 						}
-
+//					for (Row row : sheet) {
+//						if (row == null) {
+//							break;
+//						}
+//						int rowNum = row.getRowNum();
+//						model.insertRow(row, rowData);
+//						for (Cell cell : row) {
+////							for (int col = 0; col <= heigh; col++) {
+//								if (cell.getColumnIndex() >= heigh) {
+//									break;
+//								}
+//								model.addColumn(cell.getStringCellValue());
+////							}
+//						}
+//					}
+						model.insertRow(0, new Object[] { 1, 2, 3 });
+//					model.addRow(new Object[] {4,2,3});
+						System.out.println();
 						JTable table = new JTable(model);
 						table.setVisible(true);
+//					model.addColumn("NO");
+//					model.addColumn("ID");
+//					model.addColumn("Name");
+//					model.addColumn("Age");
+//					model.addColumn("Address");
 						scrollPane.setViewportView(table);
 						scrollPane.updateUI();
+//					contentPane.add(scrollPane);
+//					contentPane.updateUI();
 
-					} catch (Exception ex) {
+					}
+
+//					
+//					InputStream inp = null;
+//					try {
+//						inp = new FileInputStream(excelPath);
+//
+//						Workbook wb = WorkbookFactory.create(inp);
+//						Sheet sheet = wb.getSheetAt(0);
+//						Header header = sheet.getHeader();
+//
+//						int rowsCount = sheet.getLastRowNum();
+//
+//						for (int i = 0; i < rowsCount; i++) {
+//							Row row = sheet.getRow(i);
+//							int colCounts = row.getLastCellNum();
+//						
+//							for (int j = 0; j < colCounts; j++) {
+//								Cell cell = row.getCell(j);
+//								System.out.println(cell.getStringCellValue());
+//
+////								switch (cell.getCellType()) {
+////								case STRING:
+////									model.addColumn(cell.getStringCellValue());
+////									break;
+////								case BOOLEAN:
+////									model.addColumn(cell.getBooleanCellValue());
+////									break;
+////								case NUMERIC:
+////									model.addColumn(cell.getNumericCellValue());
+////									break;
+////								}
+//
+//							}
+//						}
+//					}
+
+					catch (Exception ex) {
 						JOptionPane.showMessageDialog(null, ex.getMessage());
 					}
 				}
 			}
 		});
 
-		btnSelect.setBounds(103, 12, 89, 30);
+		btnSelect.setBounds(30, 13, 71, 25);
 		panel.add(btnSelect);
 
 		JPanel PrizePanel = new JPanel();
@@ -192,24 +259,24 @@ public class AdminScreen extends JFrame {
 		JButton btnSave = new JButton("Save");
 		btnSave.setBounds(612, 514, 82, 33);
 		PrizePanel.add(btnSave);
-		
-		mnEmployeeList.addActionListener(new ActionListener() {
-			
+
+		openPrizePanel.addActionListener(new ActionListener() {
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Listpanel.setVisible(true);
-				PrizePanel.setVisible(false);
-				
+				PrizePanel.setVisible(true);
+				Listpanel.setVisible(false);
+
 			}
 		});
-		
-		mnEditPrize.addActionListener(new ActionListener() {
-			
+
+		showList.addActionListener(new ActionListener() {
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Listpanel.setVisible(false);
-				PrizePanel.setVisible(true);
-				
+				PrizePanel.setVisible(false);
+				Listpanel.setVisible(true);
+
 			}
 		});
 
