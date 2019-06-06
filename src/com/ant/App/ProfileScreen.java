@@ -9,59 +9,27 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
-import org.omg.PortableInterceptor.INACTIVE;
-
 import com.ant.entities.User;
 import com.toedter.calendar.JDateChooser;
 
-import javax.swing.JLayeredPane;
 import javax.swing.JLabel;
 import java.awt.Font;
-import javax.swing.JToolBar;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JMenu;
-import javax.swing.ImageIcon;
-import javax.swing.SwingConstants;
 import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Scanner;
 import java.awt.event.ActionEvent;
 import java.awt.Color;
-import javax.swing.UIManager;
-import java.awt.SystemColor;
-import javax.swing.JSpinner;
-import javax.swing.JSeparator;
-import javax.swing.JEditorPane;
-import javax.swing.JTextPane;
-import javax.swing.JTabbedPane;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dialog;
 
-import javax.swing.JToggleButton;
-
-public class DashBroadScreen extends JFrame {
+public class ProfileScreen extends JFrame {
 
 	private JPanel contentPane;
-	private JTextField textField;
-	private JTextField txtLose;
-	private JTextField txtWin;
-	private JTextField txtGirf;
 	private User user;
 
 	private User getUser() {
@@ -79,7 +47,7 @@ public class DashBroadScreen extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					DashBroadScreen frame = new DashBroadScreen();
+					ProfileScreen frame = new ProfileScreen();
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -88,7 +56,7 @@ public class DashBroadScreen extends JFrame {
 		});
 	}
 
-	public DashBroadScreen() {
+	public ProfileScreen() {
 
 	}
 
@@ -96,7 +64,7 @@ public class DashBroadScreen extends JFrame {
 	 * Create the frame.
 	 */
 
-	public DashBroadScreen(User _user) {
+	public ProfileScreen(User _user) {
 		setUser(_user);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 1000, 700);
@@ -106,98 +74,9 @@ public class DashBroadScreen extends JFrame {
 		contentPane.setLayout(null);
 		JMenu profiel = new JMenu();
 
-		JMenuBar menuBar = new JMenuBar();
-		menuBar.setBackground(Color.WHITE);
-		menuBar.setBounds(0, 0, 172, 26);
-		contentPane.add(menuBar);
-
-		JMenuItem mnProfile = new JMenuItem("Profile");
-		mnProfile.setBackground(SystemColor.menu);
-		menuBar.add(mnProfile);
-
-		JMenuItem mnSpin = new JMenuItem("Spin reward");
-		mnSpin.setBackground(SystemColor.menu);
-		menuBar.add(mnSpin);
-
-		JPanel spinPanel = new JPanel();
-		spinPanel.setBounds(10, 50, 954, 590);
-		contentPane.add(spinPanel);
-		spinPanel.setLayout(null);
-
-		JPanel panel_1 = new JPanel();
-		panel_1.setBounds(66, 33, 830, 176);
-		spinPanel.add(panel_1);
-		panel_1.setLayout(null);
-
-		JButton btnStart = new JButton("Start");
-		btnStart.setBounds(606, 26, 114, 70);
-		panel_1.add(btnStart);
-		btnStart.setFont(new Font("Tahoma", Font.BOLD | Font.ITALIC, 20));
-
-		textField = new JTextField();
-		textField.setText("1");
-		textField.setHorizontalAlignment(SwingConstants.CENTER);
-		textField.setFont(new Font("Arial", Font.BOLD, 40));
-		textField.setEditable(false);
-		textField.setColumns(10);
-		textField.setBounds(109, 39, 392, 59);
-		panel_1.add(textField);
-
-		JLabel lblNewLabel = new JLabel("ID:");
-		lblNewLabel.setFont(new Font("Dialog", Font.BOLD | Font.ITALIC, 40));
-		lblNewLabel.setBounds(23, 38, 62, 59);
-		panel_1.add(lblNewLabel);
-
-		JLabel lblNewLabel_1 = new JLabel("Giải:");
-		lblNewLabel_1.setFont(new Font("Dialog", Font.BOLD, 18));
-		lblNewLabel_1.setBounds(34, 229, 46, 35);
-		panel_1.add(lblNewLabel_1);
-
-		JPanel conPanel = new JPanel();
-		conPanel.setBounds(66, 276, 830, 275);
-		spinPanel.add(conPanel);
-		conPanel.setLayout(null);
-		conPanel.setVisible(false);
-
-		txtWin = new JTextField();
-		txtWin.setBounds(72, 48, 692, 66);
-		conPanel.add(txtWin);
-		txtWin.setText("Chúc mừng");
-		txtWin.setHorizontalAlignment(SwingConstants.CENTER);
-		txtWin.setForeground(Color.RED);
-		txtWin.setFont(new Font("Dialog", Font.PLAIN, 30));
-		txtWin.setEditable(false);
-		txtWin.setColumns(10);
-
-		txtGirf = new JTextField();
-		txtGirf.setBounds(72, 166, 692, 66);
-		conPanel.add(txtGirf);
-		txtGirf.setHorizontalAlignment(SwingConstants.CENTER);
-		txtGirf.setForeground(Color.RED);
-		txtGirf.setFont(new Font("Dialog", Font.PLAIN, 28));
-		txtGirf.setEditable(false);
-		txtGirf.setColumns(10);
-
-		JPanel losePanel = new JPanel();
-		losePanel.setBounds(66, 276, 830, 275);
-		spinPanel.add(losePanel);
-		losePanel.setLayout(null);
-		losePanel.setVisible(false);
-
-		txtLose = new JTextField();
-		txtLose.setForeground(Color.BLUE);
-		txtLose.setHorizontalAlignment(SwingConstants.CENTER);
-		txtLose.setFont(new Font("Dialog", Font.PLAIN, 30));
-		txtLose.setEditable(false);
-		txtLose.setText("CHÚC BẠN MAY MẮN LẦN SAU");
-		txtLose.setBounds(36, 36, 782, 78);
-		losePanel.add(txtLose);
-		txtLose.setColumns(10);
-
 		JPanel profilePanel = new JPanel();
 		profilePanel.setBounds(159, 50, 647, 590);
 		contentPane.add(profilePanel);
-		profilePanel.setVisible(false);
 
 		JLabel lblID = new JLabel("ID: ");
 		profiel.add(lblID);
@@ -262,7 +141,7 @@ public class DashBroadScreen extends JFrame {
 		profilePanel.add(txtPassword);
 		txtPassword.setColumns(10);
 		txtPassword.setEditable(false);
-		
+
 		JButton btnEp = new JButton("Edit");
 		btnEp.setBounds(575, 300, 55, 30);
 		profilePanel.add(btnEp);
@@ -306,15 +185,15 @@ public class DashBroadScreen extends JFrame {
 		}
 
 		btnEp.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				txtPassword.setEditable(true);
 				txtRePassword.setEditable(true);
-				
+
 			}
 		});
-		
+
 		JButton btnSubmit = new JButton("Submit");
 		btnSubmit.setFont(new Font("Dialog", Font.BOLD, 14));
 		btnSubmit.setBounds(219, 495, 157, 44);
@@ -322,14 +201,17 @@ public class DashBroadScreen extends JFrame {
 
 		btnSubmit.addActionListener(new ActionListener() {
 
+			@SuppressWarnings("deprecation")
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				String name = txtName.getText();
 				String address = txtAddress.getText();
 				String pass = txtPassword.getText();
-				
-				DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
-				String dateOfBirth = df.format(txtbirthDate.getDate());
+
+				Calendar c = Calendar.getInstance();
+				int year = c.get(Calendar.YEAR);
+				int yearOfBirth = txtbirthDate.getDate().getYear() + 1900;
+				int age = year - yearOfBirth ;
 				File f = new File("Login.txt");
 				ArrayList<String> list = new ArrayList<String>();
 				String str = "";
@@ -343,10 +225,9 @@ public class DashBroadScreen extends JFrame {
 
 							System.out.println(str);
 
-							list.add(token[0] + "," + token[1] + "," + pass + "," + name + "," + address + ","
-									+ dateOfBirth);
+							list.add(token[0] + "," + token[1] + "," + pass + "," + name + "," + age + "," + address);
 
-							System.out.println(list);
+							
 						} else {
 							list.add(str);
 						}
@@ -394,26 +275,6 @@ public class DashBroadScreen extends JFrame {
 		btnLogout.setBounds(884, 0, 98, 26);
 		contentPane.add(btnLogout);
 		helloLable.append(lblHello.getText());
-
-		mnProfile.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				profilePanel.setVisible(true);
-				spinPanel.setVisible(false);
-
-			}
-		});
-
-		mnSpin.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				profilePanel.setVisible(false);
-				spinPanel.setVisible(true);
-
-			}
-		});
 	}
 
 }

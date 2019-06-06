@@ -1,7 +1,5 @@
 package com.ant.App;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.EventQueue;
 
 import java.util.*;
@@ -12,52 +10,30 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
-import org.apache.commons.math3.stat.descriptive.summary.Product;
-import org.apache.poi.hssf.usermodel.HSSFDateUtil;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Header;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import com.ant.Util.ExcelHelper;
 import com.ant.Util.FileTypeFilter;
 
-import javax.swing.BoxLayout;
-import javax.swing.JTabbedPane;
-import javax.swing.JLabel;
 import javax.swing.JTable;
-import java.awt.Font;
 import javax.swing.JMenuBar;
-import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 
 import java.awt.event.ActionListener;
-import java.lang.reflect.Method;
 import java.awt.event.ActionEvent;
 import javax.swing.JTextField;
-import javax.swing.JTextPane;
 import javax.swing.JScrollPane;
-import javax.swing.JPopupMenu;
-import java.awt.Component;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-
 import java.io.*;
+import java.awt.SystemColor;
 
-public class AdminScreen extends JFrame {
+public class ListEmployeeScreen extends JFrame {
 
 	private JPanel contentPane;
-
-	public DefaultTableModel model;
 
 	/**
 	 * Launch the application.
@@ -66,8 +42,9 @@ public class AdminScreen extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					AdminScreen frame = new AdminScreen();
+					ListEmployeeScreen frame = new ListEmployeeScreen();
 					frame.setVisible(true);
+
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -75,51 +52,120 @@ public class AdminScreen extends JFrame {
 		});
 	}
 
+	ArrayList<User> list = new ArrayList<User>();
+
+	private void readDataEmployee() {
+		File file = new File("Login.txt");
+		
+			try {
+				
+				FileReader fr = new FileReader(file);
+				BufferedReader br = new BufferedReader(fr);
+				String data = br.readLine();
+				while (data != null) {
+					String token[] = data.split(",");
+					User user = new User();
+					user.setId(Integer.parseInt(token[0]));
+					user.setName(token[3]);
+					user.setAge(Integer.parseInt(token[4]));
+					user.setAddress(token[5]);
+
+					list.add(user);
+					data = br.readLine();
+				}
+				br.close();
+				fr.close();
+				
+			}
+			catch (FileNotFoundException ex) {
+				ex.printStackTrace();
+			}
+			catch (Exception e) {
+				// TODO: handle exception
+				e.printStackTrace();
+			}
+		
+		
+	}
+
+	private void showEmployee(JTable table, JScrollPane scrollPane, DefaultTableModel model) {
+
+		try {
+			int i = 0;
+			for (User u : list) {
+				i++;
+
+				Vector<Object> row = new Vector<Object>();
+				row.add(i);
+				row.add(u.getId());
+				row.add(u.getName());
+				row.add(u.getAge());
+				row.add(u.getAddress());
+
+				model.addRow(row);
+			}
+
+			table.setModel(model);
+
+			table.setVisible(true);
+			scrollPane.setViewportView(table);
+			scrollPane.updateUI();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
 	/**
 	 * Create the frame.
 	 */
+	public ListEmployeeScreen() {
 
-	public AdminScreen() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 803, 697);
+		setBounds(100, 100, 800, 700);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 
 		JMenuBar menuBar = new JMenuBar();
-		menuBar.setBounds(0, 0, 132, 26);
+		menuBar.setBounds(0, 0, 213, 26);
 		contentPane.add(menuBar);
 
-		JMenuItem mnEmployeeList = new JMenuItem("Employee ");
-		menuBar.add(mnEmployeeList);
+		JMenuItem mnEmployee = new JMenuItem("Employee ");
+		mnEmployee.setBackground(SystemColor.activeCaption);
+		menuBar.add(mnEmployee);
 
-		JMenuItem mnEditPrize = new JMenuItem("Prize");
-		menuBar.add(mnEditPrize);
+		JMenuItem mnPrize = new JMenuItem("Prize");
+		menuBar.add(mnPrize);
 
-		JPanel Listpanel = new JPanel();
-		Listpanel.setBounds(0, 39, 785, 611);
-		contentPane.add(Listpanel);
-		Listpanel.setLayout(null);
-
-		JPanel panel = new JPanel();
-		panel.setBounds(12, 13, 761, 42);
-		Listpanel.add(panel);
-		panel.setLayout(null);
+		JMenuItem mnDb = new JMenuItem("Dashbroad");
+		menuBar.add(mnDb);
 
 		JTextField txtUrl = new JTextField();
-		txtUrl.setBounds(204, 13, 452, 30);
-		panel.add(txtUrl);
+		txtUrl.setBounds(212, 38, 496, 36);
+		contentPane.add(txtUrl);
 		txtUrl.setColumns(10);
 
-		List<User> listUsers = new ArrayList<>();
-		model = new DefaultTableModel();
+		DefaultTableModel model = new DefaultTableModel();
+		model.addColumn("NO");
+		model.addColumn("ID");
+		model.addColumn("Name");
+		model.addColumn("Age");
+		model.addColumn("Address");
+		
+		readDataEmployee();
 
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(68, 102, 658, 458);
-		Listpanel.add(scrollPane);
+		scrollPane.setBounds(44, 108, 693, 507);
+		contentPane.add(scrollPane);
+		JTable table = new JTable();
+		showEmployee(table, scrollPane, model);
 
 		JButton btnSelect = new JButton("Import");
+		btnSelect.setBounds(77, 38, 112, 35);
+		contentPane.add(btnSelect);
 		btnSelect.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser fs = new JFileChooser();
@@ -138,10 +184,10 @@ public class AdminScreen extends JFrame {
 						@SuppressWarnings("resource")
 						XSSFWorkbook workbook = new XSSFWorkbook(fis);
 						Sheet sheet = workbook.getSheetAt(0);
-						for (Cell cell : sheet.getRow(0)) {
-							model.addColumn(cell.getStringCellValue());
-
-						}
+//						for (Cell cell : sheet.getRow(0)) {
+//							model.addColumn(cell.getStringCellValue());
+//
+//						}
 
 						for (Row row : sheet) {
 							int rowNum = row.getRowNum();
@@ -149,7 +195,7 @@ public class AdminScreen extends JFrame {
 
 							} else {
 								int i = 0;
-								Vector data = new Vector<>();
+								Vector<Object> data = new Vector<>();
 								for (Cell cell : row) {
 									data.add(i, cell.getStringCellValue());
 									i++;
@@ -160,7 +206,6 @@ public class AdminScreen extends JFrame {
 
 						}
 
-						JTable table = new JTable(model);
 						table.setVisible(true);
 						scrollPane.setViewportView(table);
 						scrollPane.updateUI();
@@ -172,46 +217,24 @@ public class AdminScreen extends JFrame {
 			}
 		});
 
-		btnSelect.setBounds(103, 12, 89, 30);
-		panel.add(btnSelect);
+		mnPrize.addActionListener(new ActionListener() {
 
-		JPanel PrizePanel = new JPanel();
-		PrizePanel.setBounds(0, 39, 785, 611);
-		contentPane.add(PrizePanel);
-		PrizePanel.setVisible(false);
-		PrizePanel.setLayout(null);
-
-		JTable tblPrize = new JTable();
-		tblPrize.setBounds(69, 113, 656, 447);
-		PrizePanel.add(tblPrize);
-
-		JTextField txtEdit = new JTextField();
-		txtEdit.setBounds(111, 514, 454, 33);
-		PrizePanel.add(txtEdit);
-
-		JButton btnSave = new JButton("Save");
-		btnSave.setBounds(612, 514, 82, 33);
-		PrizePanel.add(btnSave);
-		
-		mnEmployeeList.addActionListener(new ActionListener() {
-			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Listpanel.setVisible(true);
-				PrizePanel.setVisible(false);
-				
+				PrizeScreen prizeScreen = new PrizeScreen();
+				prizeScreen.setVisible(true);
+				setVisible(false);
 			}
 		});
-		
-		mnEditPrize.addActionListener(new ActionListener() {
-			
+		mnDb.addActionListener(new ActionListener() {
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Listpanel.setVisible(false);
-				PrizePanel.setVisible(true);
-				
+				// TODO Auto-generated method stub
+				DashbroadScreen dashbroad = new DashbroadScreen();
+				dashbroad.setVisible(true);
+				setVisible(false);
 			}
 		});
-
 	}
 }

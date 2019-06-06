@@ -7,59 +7,32 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.border.EmptyBorder;
-import com.ant.App.AdminScreen;
 import com.ant.entities.*;
 
-import org.apache.xmlbeans.impl.xb.xsdschema.Public;
-import org.omg.CORBA.PRIVATE_MEMBER;
-import org.omg.CORBA.PUBLIC_MEMBER;
-
-import javax.swing.BoxLayout;
 import javax.swing.JLabel;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
-import java.awt.RenderingHints.Key;
-import java.awt.event.InputMethodEvent;
-import java.awt.event.InputMethodListener;
+
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.LineNumberReader;
-import java.io.OutputStream;
-import java.net.ConnectException;
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.awt.GridLayout;
+
 import java.awt.Font;
 import javax.swing.JTextField;
-import javax.swing.JTabbedPane;
-import javax.swing.JSplitPane;
-import javax.swing.JLayeredPane;
-import javax.swing.SwingConstants;
 
-import com.toedter.calendar.JCalendar;
 import com.toedter.calendar.JDateChooser;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
+
 import java.awt.Color;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import javax.swing.ImageIcon;
 
 public class RegisterScreen extends JFrame {
 
@@ -69,7 +42,7 @@ public class RegisterScreen extends JFrame {
 	private JTextField txtRePassword;
 	private JTextField txtAddress;
 	private JTextField txtName;
-	String list;
+	ArrayList<User> list =new ArrayList<User>();
 
 	/**
 	 * Launch the application.
@@ -87,7 +60,8 @@ public class RegisterScreen extends JFrame {
 		});
 	}
 
-	private void writeToFile(ArrayList<User> list) throws IOException {
+	@SuppressWarnings("resource")
+	private void writeFileLogin() throws IOException {
 
 		File f = new File("Login.txt");
 		FileWriter fw = new FileWriter(f, true);
@@ -95,12 +69,13 @@ public class RegisterScreen extends JFrame {
 		int i = 0;
 		try {
 			BufferedWriter bw = new BufferedWriter(fw);
-			BufferedReader br= new BufferedReader(fr);
+			BufferedReader br = new BufferedReader(fr);
+			
 			while (br.readLine() != null) {
 				i++;
 			}
 			for (User user : list) {
-				user.setId(i+1);
+				user.setId(i + 1007);
 				bw.write(user.toString());
 			}
 			bw.newLine();
@@ -249,7 +224,6 @@ public class RegisterScreen extends JFrame {
 		lblBirthWarn.setBounds(160, 279, 160, 16);
 		panel.add(lblBirthWarn);
 
-	
 		JButton btnSubmit = new JButton("Submit");
 		btnSubmit.addActionListener(new ActionListener() {
 			@SuppressWarnings("resource")
@@ -257,20 +231,18 @@ public class RegisterScreen extends JFrame {
 				User user = new User();
 //				
 
-				DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
-				String dateBirth = df.format(txtbirthDate.getDate());
 				try {
-					
+
 					user.setUserName(txtUserName.getText());
 					user.setName(txtName.getText());
 					user.setPassword(txtPassword.getText());
 					user.setAddress(txtAddress.getText());
-					user.setDateOfBirth(dateBirth);
-					
-					ArrayList<User> al = new ArrayList<User>();
-					al.add(user);
+					user.setDateOfBirth(txtbirthDate.getDate());
 
-					writeToFile(al);
+					
+					list.add(user);
+
+					writeFileLogin();
 					LoginScreen loginScreen = new LoginScreen();
 					loginScreen.setVisible(true);
 					setVisible(false);
@@ -278,7 +250,8 @@ public class RegisterScreen extends JFrame {
 					e.printStackTrace();
 				}
 
-				if (txtUserName.getText().matches("[\\\\!\"#$%&()*+,./:;<=>?@\\[\\]^_{|}~]+") || txtUserName.getText().matches("[1-9]")) {
+				if (txtUserName.getText().matches("[\\\\!\"#$%&()*+,./:;<=>?@\\[\\]^_{|}~]+")
+						|| txtUserName.getText().matches("[1-9]")) {
 
 					lblUserNamewarn.setText("You can use letters(a-z, A_Z) & periods");
 				} else if (txtUserName.getText().equals("")) {
@@ -306,7 +279,6 @@ public class RegisterScreen extends JFrame {
 		});
 		btnClear.setBounds(302, 327, 97, 25);
 		panel.add(btnClear);
-
 
 	}
 }

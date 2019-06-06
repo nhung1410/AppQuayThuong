@@ -7,6 +7,8 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.border.EmptyBorder;
+
+import com.ant.Util.CheckUser;
 import com.ant.entities.*;
 
 import org.apache.commons.codec.binary.StringUtils;
@@ -48,6 +50,8 @@ public class LoginScreen extends JFrame {
 	private JPanel LoginPanel;
 	private JTextField txtUserName;
 	private JTextField txtPassword;
+	private JLabel lblUserWarning;
+	private JLabel lblPasswarning;
 
 	/**
 	 * Launch the application.
@@ -73,49 +77,47 @@ public class LoginScreen extends JFrame {
 		FileReader fr = null;
 		BufferedReader br = null;
 		String str = null;
-	
-//		1,nhung,112233,nhung,hn,10/05/2019
+
 		try {
 
 			fr = new FileReader("Login.txt");
 			br = new BufferedReader(fr);
 
 			while ((str = br.readLine()) != null) {
-			
+
 				String[] token = str.split(",");
 
-				if(token[1].equals(txtUserName.getText())&& token[2].equals(txtPassword.getText()) ) {
+				if (token[1].equals(txtUserName.getText()) && token[2].equals(txtPassword.getText())) {
 					try {
 						User info = new User();
 						info.setId(Integer.parseInt(token[0]));
 						info.setUserName(token[1]);
 						info.setPassword(token[2]);
 						info.setName(token[3]);
-						info.setAddress(token[4]);
-						info.setDateOfBirth(token[5]);
-						
-						DashBroadScreen broadScreen = new DashBroadScreen(info);
+						info.setAge(Integer.parseInt(token[4]));
+
+						info.setAddress(token[5]);
+
+						ProfileScreen broadScreen = new ProfileScreen(info);
 						broadScreen.setVisible(true);
-						
+
 						setVisible(false);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-				}
-				}
-			if(txtUserName.getText().equals("superadmin") && txtPassword.getText().equals("password")) {
-				setVisible(false);
-				AdminScreen adminScreen = new AdminScreen();
-				adminScreen.setVisible(true);
-			}
-			else{
-			
-			}
-			
+				} else if ((token[1].equals(txtUserName.getText())) && (!token[2].equals(txtPassword.getText()))) {
+					lblPasswarning.setText("Wrong password. Try again.");
 
-			
+				}
 
-			// all code
+				else if ((!token[1].equals(txtUserName.getText())) && (token[2].equals(txtPassword.getText()))) {
+
+					lblUserWarning.setText("Wrong username. Try again.");
+
+				}
+
+			}
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -128,6 +130,11 @@ public class LoginScreen extends JFrame {
 		}
 	}
 
+	private void CheckUser() {
+		// TODO Auto-generated method stub
+
+	}
+
 	public LoginScreen() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 400, 300);
@@ -137,11 +144,13 @@ public class LoginScreen extends JFrame {
 		LoginPanel.setLayout(null);
 
 		JLabel lblLogin = new JLabel("Name:");
-		lblLogin.setBounds(62, 63, 41, 16);
+		lblLogin.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblLogin.setBounds(48, 63, 55, 16);
 		LoginPanel.add(lblLogin);
 
 		JLabel lblPassword = new JLabel("Password:");
-		lblPassword.setBounds(68, 110, 61, 16);
+		lblPassword.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblPassword.setBounds(48, 110, 75, 16);
 		LoginPanel.add(lblPassword);
 
 		txtUserName = new JTextField();
@@ -149,7 +158,7 @@ public class LoginScreen extends JFrame {
 		LoginPanel.add(txtUserName);
 		txtUserName.setColumns(10);
 
-		JLabel lblUserWarning = new JLabel("");
+		lblUserWarning = new JLabel("");
 		lblUserWarning.setFont(new Font("Dialog", Font.ITALIC, 12));
 		lblUserWarning.setForeground(Color.RED);
 		lblUserWarning.setBounds(135, 81, 211, 16);
@@ -160,35 +169,38 @@ public class LoginScreen extends JFrame {
 		LoginPanel.add(txtPassword);
 		txtPassword.setColumns(10);
 
-		JLabel lblPasswarning = new JLabel("");
+		lblPasswarning = new JLabel("");
 		lblPasswarning.setFont(new Font("Dialog", Font.ITALIC, 12));
 		lblPasswarning.setForeground(Color.RED);
 		lblPasswarning.setBounds(135, 130, 211, 16);
 		LoginPanel.add(lblPasswarning);
-		
+
 		JButton btnLogin = new JButton("Login");
+		btnLogin.setFont(new Font("Tahoma", Font.BOLD, 14));
 		btnLogin.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				
-				
-				login();
-					
-					LoginPanel.updateUI();
-//			 if ((txtPassword.getText().length() > 0) && (txtUserName.getText().length() > 0)) {
-//					if (!txtUserName.getText().equals("username")) {
-//						lblUserWarning.setText("Wrong username. Try again.");
-//					} else {
-//						lblPasswarning.setText("Wrong password. Try again.");
-//					}
-//
-//				} else {
-//					if (txtUserName.getText().equals(""))
-//						lblUserWarning.setText("Enter user name");
-//
-//					else
-//
-//						lblPasswarning.setText("Enter Password");
-//				}
+				try {
+					if ((txtPassword.getText().length() > 0) && (txtUserName.getText().length() > 0)) {
+						if (txtUserName.getText().equals("superadmin") && txtPassword.getText().equals("password")) {
+							setVisible(false);
+							ListEmployeeScreen adminScreen = new ListEmployeeScreen();
+							adminScreen.setVisible(true);
+						} else {
+							login();
+						}
+
+					} else {
+						if (txtUserName.getText().equals(""))
+							lblUserWarning.setText("Enter Username");
+
+						else
+
+							lblPasswarning.setText("Enter Password");
+					}
+
+				} catch (Exception e) {
+					// TODO: handle exception
+				}
 
 			}
 		});
@@ -197,6 +209,7 @@ public class LoginScreen extends JFrame {
 		LoginPanel.add(btnLogin);
 
 		JButton btnRegiser = new JButton("Register");
+		btnRegiser.setFont(new Font("Tahoma", Font.BOLD, 14));
 		btnRegiser.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				RegisterScreen registerScreen = new RegisterScreen();

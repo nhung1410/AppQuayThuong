@@ -1,6 +1,8 @@
 package com.ant.entities;
 
 import com.toedter.calendar.JCalendar;
+import com.toedter.calendar.JDateChooser;
+
 import java.util.*;
 
 /**
@@ -13,7 +15,28 @@ public class User {
 	private String name;
 	private String password;
 	private String address;
-	private String dateOfBirth;
+	private Date dateOfBirth;
+	private int age;
+
+	
+	public int getAge() {
+		return age;
+	}
+
+
+	public void setAge(int age) {
+		this.age = age;
+	}
+
+
+	@SuppressWarnings("deprecation")
+	public int age() {
+		Calendar c = Calendar.getInstance();
+		int year = c.get(Calendar.YEAR);
+		int yearOfBirth = dateOfBirth.getYear() + 1900;
+		return year - yearOfBirth;
+	}
+	
 
 	public int getId() {
 		return id;
@@ -55,22 +78,21 @@ public class User {
 		this.address = address;
 	}
 
-	public String getDateOfBirth() {
+	public Date getDateOfBirth() {
 		return dateOfBirth;
 	}
 
-	public void setDateOfBirth(String dateOfBirth) {
-		this.dateOfBirth = dateOfBirth;
+	public void setDateOfBirth(Date txtbirthDate) {
+		this.dateOfBirth = txtbirthDate;
 	}
 
-	public User(int id, String userName, String name, String password, String address, String dateOfBirth) {
+	public User(int id, String userName, String name, String password, String address) {
 		super();
 		this.id = id;
 		this.userName = userName;
 		this.name = name;
 		this.password = password;
 		this.address = address;
-		this.dateOfBirth = dateOfBirth;
 	}
 
 	public User() {
@@ -79,7 +101,7 @@ public class User {
 
 	@Override
 	public String toString() {
-		return id + "," + userName + "," + password + "," + name + "," + address + "," + dateOfBirth;
+		return id + "," + userName + "," + password + "," + name  + "," + age()+ "," + address;
 	}
 
 }
