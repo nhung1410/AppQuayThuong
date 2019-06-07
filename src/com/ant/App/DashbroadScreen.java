@@ -11,9 +11,13 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
+import java.util.Vector;
 import java.util.stream.IntStream;
 
 import com.ant.App.ListEmployeeScreen;
@@ -27,6 +31,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import org.apache.commons.compress.utils.Lists;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Appender;
 import org.apache.xmlbeans.XmlCursor.TokenType;
 
@@ -38,6 +44,8 @@ import java.awt.Font;
 import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
 import javax.swing.JLabel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 
 public class DashbroadScreen extends JFrame {
 
@@ -50,8 +58,11 @@ public class DashbroadScreen extends JFrame {
 	private JTextField txt3;
 	private JTextField txt4;
 	private JTextField txtClazz;
-	ArrayList<DetailReward> dereList = new ArrayList<DetailReward>();
+	int rewardId;
+	int turn;
+
 	ArrayList<Reward> reList = new ArrayList<Reward>();
+
 	/**
 	 * Launch the application.
 	 */
@@ -69,28 +80,48 @@ public class DashbroadScreen extends JFrame {
 	}
 
 	public void RanIdEmployee() {
-		int max;
-		int min;
+
+		ArrayList<String> array = new ArrayList<String>();
+		double _max = 0;
+		double _min = 0;
+		String[] array2;
+		Vector<Object> listEmp = new Vector<>();
+		listEmp = ListEmployeeScreen.getData();
 		File file = new File("Login.txt");
+
 
 		try {
 			FileReader fr = new FileReader(file);
 			BufferedReader br = new BufferedReader(fr);
 			String data = br.readLine();
 			int countLine = 0;
-			String token[] = data.split(",");
-
-			min = Integer.parseInt(token[0]);
 			while (data != null) {
-
+				String token[] = data.split(",");
 				data = br.readLine();
-
-				countLine++;
+				array.add(token[0]);
 
 			}
 			Random ran = new Random();
+			if(listEmp != null) {
+				for (int i = 0; i < listEmp.size(); i++) {
+					array2 = listEmp.get(i).toString().split(",");
+					array.add(array2[1]);
+				}
+			}
+			else {
+				
+			}
+			_min = Integer.parseInt(array.get(0));
+			for (int i = 0; i < array.size(); i++) {
+				double temp = Double.parseDouble(array.get(i));
+				if (temp < _min) {
+					_min = temp;
+				} else {
 
-			int result = min + ran.nextInt(countLine);
+				}
+				}
+
+			int result = (int) _min + ran.nextInt(array.size());
 
 			String t1 = String.valueOf(result / 1000);
 			String t2 = String.valueOf((result / 100) % 10);
@@ -100,8 +131,6 @@ public class DashbroadScreen extends JFrame {
 			txt2.setText(t2);
 			txt3.setText(t3);
 			txt4.setText(t4);
-			int[] arr = new int[countLine];
-//			
 
 //			for(int  i =min ;i<(min +countLine);i++) {
 //				if(result == arr[i] ) {
@@ -125,31 +154,21 @@ public class DashbroadScreen extends JFrame {
 	}
 
 	private JTextField txtTurn;
-	
-	
-	private void readFileReward(DetailReward dere) {
+	private JTable table;
+
+	private void readFileReward() {
 		File file = new File("Reward.txt");
 		try {
-			FileReader fr = new FileReader(file);
-			BufferedReader br = new BufferedReader(fr);
-			String data = br.readLine();
-			while (data != null) {
-				String token[] = data.split(",");
-				Reward reward = new Reward();
-				reward.setId(Integer.parseInt(token[0]));
-				reward.setClazz(token[1]);
-				reward.setTurns(Integer.parseInt(token[2]));
-				reward.setPrize(token[3]);
-				dere.setRewardId(reward.getId());
+			List<String> lines = FileUtils.readLines(file, "UTF-8");
+			for (String st : lines) {
+				String token[] = st.split(",");
 				txtClazz.setText(token[1]);
-				txtTurn.setText(token[2]);
-				data = br.readLine();
-				
-				
+
+				rewardId = Integer.parseInt(token[0]);
+				turn = Integer.parseInt(token[2]);
+
 			}
-			
-			br.close();
-			fr.close();
+
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
@@ -157,10 +176,10 @@ public class DashbroadScreen extends JFrame {
 	}
 
 	private void updateFileReward() {
-		
+
 	}
 
-	private void writeFileDetailReward(ArrayList<DetailReward> arrayList) {
+	private void writeFileDetailReward(DetailReward dere) {
 		File file = new File("RewardDetail.txt");
 
 		try {
@@ -174,10 +193,9 @@ public class DashbroadScreen extends JFrame {
 				while (br.readLine() != null) {
 					i++;
 				}
-				for (DetailReward dere : arrayList) {
-					dere.setId(i + 1);
-					bw.write(dere.toString());
-				}
+				dere.setId(i + 1);
+				bw.write(dere.toString());
+
 				bw.newLine();
 				bw.flush();
 				bw.close();
@@ -197,10 +215,10 @@ public class DashbroadScreen extends JFrame {
 	 * Create the frame.
 	 */
 	public DashbroadScreen() {
-		ArrayList<Reward> reList= new ArrayList<Reward>();
-		
+		ArrayList<Reward> reList = new ArrayList<Reward>();
+
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 800, 700);
+		setBounds(100, 100, 1000, 700);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -221,16 +239,29 @@ public class DashbroadScreen extends JFrame {
 		menuBar.add(mnDb);
 
 		JPanel panel = new JPanel();
-		panel.setBounds(12, 57, 758, 567);
+		panel.setBounds(12, 57, 958, 567);
 		contentPane.add(panel);
 		panel.setLayout(null);
+		txtClazz = new JTextField();
+		txtClazz.setEditable(false);
+		txtClazz.setBounds(244, 275, 100, 30);
+		panel.add(txtClazz);
+		txtClazz.setColumns(10);
+
+		txtTurn = new JTextField();
+		txtTurn.setEditable(false);
+		txtTurn.setColumns(10);
+		txtTurn.setBounds(244, 321, 100, 30);
+		panel.add(txtTurn);
+
+		readFileReward();
 
 		txtM = new JTextField();
 		txtM.setHorizontalAlignment(SwingConstants.CENTER);
 		txtM.setText("M");
 		txtM.setFont(new Font("Dialog", Font.BOLD, 20));
 		txtM.setEditable(false);
-		txtM.setBounds(138, 115, 50, 60);
+		txtM.setBounds(65, 115, 50, 60);
 		panel.add(txtM);
 		txtM.setColumns(10);
 
@@ -240,7 +271,7 @@ public class DashbroadScreen extends JFrame {
 		txtN.setHorizontalAlignment(SwingConstants.CENTER);
 		txtN.setEditable(false);
 		txtN.setColumns(10);
-		txtN.setBounds(200, 115, 50, 60);
+		txtN.setBounds(127, 115, 50, 60);
 		panel.add(txtN);
 
 		txtV = new JTextField();
@@ -249,7 +280,7 @@ public class DashbroadScreen extends JFrame {
 		txtV.setText("V");
 		txtV.setEditable(false);
 		txtV.setColumns(10);
-		txtV.setBounds(262, 115, 50, 60);
+		txtV.setBounds(189, 115, 50, 60);
 		panel.add(txtV);
 
 		txt1 = new JTextField();
@@ -257,7 +288,7 @@ public class DashbroadScreen extends JFrame {
 		txt1.setFont(new Font("Dialog", Font.BOLD, 20));
 		txt1.setEditable(false);
 		txt1.setColumns(10);
-		txt1.setBounds(324, 115, 50, 60);
+		txt1.setBounds(251, 115, 50, 60);
 		panel.add(txt1);
 
 		txt2 = new JTextField();
@@ -265,7 +296,7 @@ public class DashbroadScreen extends JFrame {
 		txt2.setHorizontalAlignment(SwingConstants.CENTER);
 		txt2.setEditable(false);
 		txt2.setColumns(10);
-		txt2.setBounds(386, 115, 50, 60);
+		txt2.setBounds(313, 115, 50, 60);
 		panel.add(txt2);
 
 		txt3 = new JTextField();
@@ -273,7 +304,7 @@ public class DashbroadScreen extends JFrame {
 		txt3.setFont(new Font("Dialog", Font.BOLD, 20));
 		txt3.setEditable(false);
 		txt3.setColumns(10);
-		txt3.setBounds(448, 115, 50, 60);
+		txt3.setBounds(374, 115, 50, 60);
 		panel.add(txt3);
 
 		txt4 = new JTextField();
@@ -281,24 +312,27 @@ public class DashbroadScreen extends JFrame {
 		txt4.setFont(new Font("Dialog", Font.BOLD, 20));
 		txt4.setEditable(false);
 		txt4.setColumns(10);
-		txt4.setBounds(510, 115, 50, 60);
+		txt4.setBounds(436, 115, 50, 60);
 		panel.add(txt4);
-
-		
+		txtTurn.setText(String.valueOf(turn));
 		JButton btnStart = new JButton("Start");
 		btnStart.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
-					
-				
-				RanIdEmployee();
-				ArrayList<DetailReward> dereList = new ArrayList<DetailReward>();
-				DetailReward dere = new DetailReward();
-				String employeeId = txt1.getText() + txt2.getText() + txt3.getText() +txt4.getText();
-				dere.setEmployeeId(Integer.parseInt(employeeId));
-				
-				}
-				catch (Exception e) {
+
+					RanIdEmployee();
+
+					DetailReward dere = new DetailReward();
+					String employeeId = txt1.getText() + txt2.getText() + txt3.getText() + txt4.getText();
+					dere.setEmployeeId(Integer.parseInt(employeeId));
+
+					dere.setRewardId(rewardId);
+
+					writeFileDetailReward(dere);
+
+					turn--;
+//					System.out.println(turn);
+				} catch (Exception e) {
 					// TODO: handle exception
 				}
 			}
@@ -317,20 +351,12 @@ public class DashbroadScreen extends JFrame {
 		lblSLnQuay.setBounds(92, 316, 130, 29);
 		panel.add(lblSLnQuay);
 
-		txtClazz = new JTextField();
-		txtClazz.setEditable(false);
-		txtClazz.setBounds(244, 275, 100, 30);
-		panel.add(txtClazz);
-		txtClazz.setColumns(10);
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBounds(584, 40, 362, 515);
+		panel.add(scrollPane);
 
-		txtTurn = new JTextField();
-		txtTurn.setEditable(false);
-		txtTurn.setColumns(10);
-		txtTurn.setBounds(244, 321, 100, 30);
-		panel.add(txtTurn);
-
-		
-		
+		table = new JTable();
+		scrollPane.setViewportView(table);
 
 		mnEmployee.addActionListener(new ActionListener() {
 

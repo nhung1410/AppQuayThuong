@@ -66,7 +66,7 @@ public class Reward {
 			BufferedWriter bw = new BufferedWriter(fw);
 			BufferedReader br = new BufferedReader(fr);
 			while (br.readLine() != null) {
-//				System.out.println("---"+i);
+
 				i++;
 			}
 

@@ -10,6 +10,7 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -34,6 +35,14 @@ import java.awt.SystemColor;
 public class ListEmployeeScreen extends JFrame {
 
 	private JPanel contentPane;
+	private static Vector<Object> list2;
+	public static Vector<Object> getData() {
+		return list2;
+	}
+
+	public static void setData(Vector<Object> list3) {
+		list2 = list3;
+	}
 
 	/**
 	 * Launch the application.
@@ -116,6 +125,33 @@ public class ListEmployeeScreen extends JFrame {
 		}
 
 	}
+	private void addFileLogin(ArrayList<User> list) throws IOException {
+
+		File f = new File("Login.txt");
+		FileWriter fw = new FileWriter(f, true);
+		FileReader fr = new FileReader(f);
+		int i = 0;
+		try {
+			BufferedWriter bw = new BufferedWriter(fw);
+			BufferedReader br = new BufferedReader(fr);
+			
+			while (br.readLine() != null) {
+				i++;
+			}
+			for (User user : list) {
+
+				bw.write(user.toString());
+			}
+			bw.newLine();
+			bw.flush();
+			bw.close();
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+	}
+	
+	
 
 	/**
 	 * Create the frame.
@@ -188,24 +224,42 @@ public class ListEmployeeScreen extends JFrame {
 //							model.addColumn(cell.getStringCellValue());
 //
 //						}
-
+						User user = new User();
+						Vector <Object> list = new Vector<>();
 						for (Row row : sheet) {
 							int rowNum = row.getRowNum();
 							if (rowNum == 0) {
 
 							} else {
 								int i = 0;
+								
 								Vector<Object> data = new Vector<>();
 								for (Cell cell : row) {
 									data.add(i, cell.getStringCellValue());
 									i++;
+									
+									
 								}
+								
 								model.addRow(data);
-
-							}
-
+								
+								list.add(data);
+//								System.out.println(data.elementAt(1));
+								
+//								user.setId(Integer.parseInt(data.elementAt(1).toString()));
+//								System.out.println(data.elementAt(3));
+//								user.setName( data.elementAt(2).toString());
+//								user.setAge(Integer.parseInt(data.elementAt(3).toString()));
+//								user.setAddress(data.elementAt(4).toString());
+//								list.add(user);
+//								addFileLogin(list);
+								}
+							
+							setData(list);
 						}
-
+						
+						
+						
 						table.setVisible(true);
 						scrollPane.setViewportView(table);
 						scrollPane.updateUI();
@@ -217,6 +271,8 @@ public class ListEmployeeScreen extends JFrame {
 			}
 		});
 
+		
+		
 		mnPrize.addActionListener(new ActionListener() {
 
 			@Override

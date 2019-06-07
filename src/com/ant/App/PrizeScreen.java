@@ -15,6 +15,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.Vector;
 
@@ -34,6 +35,7 @@ import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.xmlbeans.XmlCursor.TokenType;
 
 import com.ant.Util.ButtonEditor;
@@ -74,22 +76,8 @@ public class PrizeScreen extends JFrame {
 			while (data != null) {
 				String token[] = data.split(",");
 
-//				 System.out.println(token.toString());
 
 				Reward reward = new Reward();
-
-//				String id = token[0].toString();
-//				
-//				System.out.println("-aa-"+token[0].toString());
-//				Integer a = 0;
-//				try {
-//					a = Integer.parseInt(String.valueOf(token[0]));
-//				} catch (NumberFormatException e) {
-//					
-//				}
-//				System.out.println("--"+id);
-//				
-//				reward.setId(a);
 
 				reward.setId(Integer.parseInt(token[0]));
 				reward.setClazz(token[1]);
@@ -98,7 +86,7 @@ public class PrizeScreen extends JFrame {
 
 				list.add(reward);
 
-				 System.out.println("asdsad"+list.size());
+				System.out.println("asdsad" + list.size());
 				data = br.readLine();
 
 			}
@@ -115,8 +103,8 @@ public class PrizeScreen extends JFrame {
 
 		File f = new File("Reward.txt");
 		FileWriter fw = new FileWriter(f, true);
-//		FileReader fr = new FileReader(f);
-	
+
+
 		try {
 			BufferedWriter bw = new BufferedWriter(fw);
 			bw.write(reward.toString());
@@ -126,45 +114,6 @@ public class PrizeScreen extends JFrame {
 
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
-		}
-
-	}
-
-	private void updateFileReward() {
-		File f = new File("Reward.txt");
-		ArrayList<Reward> list = new ArrayList<Reward>();
-		Reward reward = new Reward();
-
-		try {
-			FileReader fr = new FileReader(f);
-			BufferedReader br = new BufferedReader(fr);
-			String data = br.readLine();
-			while (data != null) {
-				String[] token = data.split(",");
-
-				reward.setId(Integer.parseInt(token[0]));
-				reward.setClazz(token[1]);
-				reward.setTurns(Integer.parseInt(token[2]));
-				reward.setPrize(token[3]);
-
-				list.add(reward);
-
-				data = br.readLine();
-
-			}
-			br.close();
-			fr.close();
-		} catch (Exception e) {
-			// TODO: handle exception
-			JOptionPane.showMessageDialog(null, e.getMessage());
-		}
-		try (PrintWriter pw = new PrintWriter(f)) {
-			for (Reward re : list) {
-				pw.println(re);
-			}
-
-		} catch (Exception e) {
-			// TODO: handle exception
 		}
 
 	}
@@ -197,7 +146,7 @@ public class PrizeScreen extends JFrame {
 	 */
 	public PrizeScreen() {
 		ArrayList<Reward> readFileReward = readFileReward();
-		System.out.println("bbbbb"+readFileReward.size());
+		System.out.println("bbbbb" + readFileReward.size());
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 800, 700);
 		contentPane = new JPanel();
@@ -305,18 +254,17 @@ public class PrizeScreen extends JFrame {
 
 			}
 		});
-		
-	
+
 		showFileInTable(readFileReward, model);
-		
+
 		JButton btnAdd = new JButton("Add");
 		btnAdd.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
 
 					Reward reward = new Reward(cbbClass.getItemAt(cbbClass.getSelectedIndex()).toString(),
-							Integer.parseInt(txtTurns.getText()),edtPrize.getText());
-					
+							Integer.parseInt(txtTurns.getText()), edtPrize.getText());
+
 					Vector row = new Vector();
 					row.add(model.getRowCount() + 1);
 					row.add(reward.getId());
@@ -329,11 +277,8 @@ public class PrizeScreen extends JFrame {
 
 					model.addRow(row);
 
-					
-					
 					writeFileReward(reward);
-					
-					
+
 					table.setModel(model);
 					table.setVisible(true);
 					contentPane.updateUI();
@@ -371,47 +316,36 @@ public class PrizeScreen extends JFrame {
 				}
 
 				File f = new File("Reward.txt");
-				ArrayList<String> reList = new ArrayList<String>();
-
+				ArrayList<String> list = new ArrayList<String>();
+//				String str = "";
 				try {
-					Scanner r = new Scanner(f);
-					FileReader fr = new FileReader(f);
-					BufferedReader br = new BufferedReader(fr);
-					int i = 0;
-//					String readLine = br.readLine();
-					while (r.nextLine() != null) {
-						i++;
-						System.out.println(i+"aaaaa"+r.nextLine());
-					}
-					String str = r.nextLine();
-//					System.out.println(str);
-					
-					if (!str.isEmpty()) {
-						String[] token = str.split(",");
-//						System.out.println(str);
+//					Scanner r = new Scanner(f);
+
+					List<String> lines = FileUtils.readLines(f, "UTF-8");
+
+					for (String st : lines) {
+						String[] token = st.split(",");
+
 						if (token[0].equals(id)) {
-//							System.out.println(id);
-							reList.add(token[0] + "," + cbbClass.getSelectedItem() + "," + txtTurns.getText() + ","
+							list.add(token[0] + "," + cbbClass.getSelectedItem() + "," + txtTurns.getText() + ","
 									+ edtPrize.getText());
-//							System.out.println(reList.size());
+						} else {
+							list.add(st);
 						}
 					}
 
-					r.close();
 				} catch (Exception e) {
 					// TODO: handle exception
-					JOptionPane.showMessageDialog(null, e.getMessage());
+					e.printStackTrace();
 				}
+				try (PrintWriter pw = new PrintWriter(f)) {
+					for (String s : list) {
+						pw.println(s);
+					}
 
-//				try (PrintWriter pw = new PrintWriter(f)) {
-//					for (String s : reList) {
-//						pw.println(s);
-//						System.out.println("end");
-//					}
-//
-//				} catch (Exception e) {
-//					// TODO: handle exception
-//				}
+				} catch (Exception e) {
+					// TODO: handle exception
+				}
 
 			}
 		});
