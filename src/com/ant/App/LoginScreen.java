@@ -8,7 +8,6 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.border.EmptyBorder;
 
-import com.ant.Util.CheckUser;
 import com.ant.entities.*;
 
 import org.apache.commons.codec.binary.StringUtils;
@@ -182,9 +181,10 @@ public class LoginScreen extends JFrame {
 				try {
 					if ((txtPassword.getText().length() > 0) && (txtUserName.getText().length() > 0)) {
 						if (txtUserName.getText().equals("superadmin") && txtPassword.getText().equals("password")) {
-							setVisible(false);
+							
 							ListEmployeeScreen adminScreen = new ListEmployeeScreen();
 							adminScreen.setVisible(true);
+							setVisible(false);
 						} else {
 							login();
 						}
@@ -215,10 +215,11 @@ public class LoginScreen extends JFrame {
 				RegisterScreen registerScreen = new RegisterScreen();
 				registerScreen.setVisible(true);
 				setVisible(false);
+			
 
 			}
 		});
-		btnRegiser.setBounds(209, 158, 89, 25);
+		btnRegiser.setBounds(209, 158, 117, 25);
 		LoginPanel.add(btnRegiser);
 
 	}

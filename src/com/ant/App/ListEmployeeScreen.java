@@ -1,7 +1,7 @@
 package com.ant.App;
 
 import java.awt.EventQueue;
-
+import java.awt.Font;
 import java.util.*;
 import com.ant.entities.*;
 
@@ -23,6 +23,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 
 import java.awt.event.ActionListener;
@@ -67,7 +68,7 @@ public class ListEmployeeScreen extends JFrame {
 		File file = new File("Login.txt");
 		
 			try {
-				
+				if(file.exists() == true) {
 				FileReader fr = new FileReader(file);
 				BufferedReader br = new BufferedReader(fr);
 				String data = br.readLine();
@@ -84,6 +85,11 @@ public class ListEmployeeScreen extends JFrame {
 				}
 				br.close();
 				fr.close();
+				}
+				else {
+					
+				}
+				
 				
 			}
 			catch (FileNotFoundException ex) {
@@ -196,7 +202,11 @@ public class ListEmployeeScreen extends JFrame {
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setBounds(44, 108, 693, 507);
 		contentPane.add(scrollPane);
-		JTable table = new JTable();
+		JTable table = new JTable(){
+			public boolean isCellEditable(int row, int column) {
+				return false;
+			};
+		};
 		showEmployee(table, scrollPane, model);
 
 		JButton btnSelect = new JButton("Import");
@@ -271,7 +281,28 @@ public class ListEmployeeScreen extends JFrame {
 			}
 		});
 
-		
+		JButton btnLogout = new JButton("Log out");
+		btnLogout.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				try {
+
+					JDialog.setDefaultLookAndFeelDecorated(true);
+					int response = JOptionPane.showConfirmDialog(null, "Do you want to log out?", "Confirm",
+							JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+					if (response == JOptionPane.YES_OPTION) {
+						setVisible(false);
+						LoginScreen loginScreen = new LoginScreen();
+						loginScreen.setVisible(true);
+
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+		btnLogout.setFont(new Font("Dialog", Font.BOLD, 13));
+		btnLogout.setBounds(884, 0, 98, 26);
+		contentPane.add(btnLogout);
 		
 		mnPrize.addActionListener(new ActionListener() {
 

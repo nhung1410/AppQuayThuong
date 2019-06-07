@@ -28,6 +28,7 @@ import com.ant.entities.User;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
@@ -40,6 +41,8 @@ import java.awt.SystemColor;
 import javax.swing.JTextField;
 import javax.naming.spi.DirStateFactory.Result;
 import javax.swing.JButton;
+import javax.swing.JDialog;
+
 import java.awt.Font;
 import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
@@ -82,55 +85,64 @@ public class DashbroadScreen extends JFrame {
 	public void RanIdEmployee() {
 
 		ArrayList<String> array = new ArrayList<String>();
-		double _max = 0;
 		double _min = 0;
 		String[] array2;
 		Vector<Object> listEmp = new Vector<>();
 		listEmp = ListEmployeeScreen.getData();
 		File file = new File("Login.txt");
 
-
 		try {
-			FileReader fr = new FileReader(file);
-			BufferedReader br = new BufferedReader(fr);
-			String data = br.readLine();
-			int countLine = 0;
-			while (data != null) {
-				String token[] = data.split(",");
-				data = br.readLine();
-				array.add(token[0]);
+			if (file.exists() == true) {
+				FileReader fr = new FileReader(file);
+				BufferedReader br = new BufferedReader(fr);
+				String data = br.readLine();
+				while (data != null) {
+					String token[] = data.split(",");
+					data = br.readLine();
+					array.add(token[0]);
+
+				}
+				br.close();
+				fr.close();
+			} else {
 
 			}
 			Random ran = new Random();
-			if(listEmp != null) {
+			if (listEmp != null) {
 				for (int i = 0; i < listEmp.size(); i++) {
 					array2 = listEmp.get(i).toString().split(",");
 					array.add(array2[1]);
 				}
+			} else {
+
 			}
-			else {
-				
+			if(array.size()>0) {
+				_min = Double.parseDouble(array.get(0));
+				for (int i = 0; i < array.size(); i++) {
+					double temp = Double.parseDouble(array.get(i));
+					if (temp < _min) {
+						_min = temp;
+					} else {
+						
+					}
 			}
-			_min = Integer.parseInt(array.get(0));
-			for (int i = 0; i < array.size(); i++) {
-				double temp = Double.parseDouble(array.get(i));
-				if (temp < _min) {
-					_min = temp;
-				} else {
+				int result = (int) _min + ran.nextInt(array.size());
 
-				}
-				}
+				String t1 = String.valueOf(result / 1000);
+				String t2 = String.valueOf((result / 100) % 10);
+				String t3 = String.valueOf((result % 100) / 10);
+				String t4 = String.valueOf(result % 10);
+				txt1.setText(t1);
+				txt2.setText(t2);
+				txt3.setText(t3);
+				txt4.setText(t4);
+			
+			}else {
+				JOptionPane.showMessageDialog(null,
+					    "Chọn thêm nhân viên để quay thưởng !");
+			}
 
-			int result = (int) _min + ran.nextInt(array.size());
-
-			String t1 = String.valueOf(result / 1000);
-			String t2 = String.valueOf((result / 100) % 10);
-			String t3 = String.valueOf((result % 100) / 10);
-			String t4 = String.valueOf(result % 10);
-			txt1.setText(t1);
-			txt2.setText(t2);
-			txt3.setText(t3);
-			txt4.setText(t4);
+			
 
 //			for(int  i =min ;i<(min +countLine);i++) {
 //				if(result == arr[i] ) {
@@ -144,8 +156,7 @@ public class DashbroadScreen extends JFrame {
 //
 //			}
 
-			br.close();
-			fr.close();
+			
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
@@ -159,6 +170,7 @@ public class DashbroadScreen extends JFrame {
 	private void readFileReward() {
 		File file = new File("Reward.txt");
 		try {
+			if(file.exists() == true) {
 			List<String> lines = FileUtils.readLines(file, "UTF-8");
 			for (String st : lines) {
 				String token[] = st.split(",");
@@ -167,6 +179,9 @@ public class DashbroadScreen extends JFrame {
 				rewardId = Integer.parseInt(token[0]);
 				turn = Integer.parseInt(token[2]);
 
+			}}
+			else {
+				
 			}
 
 		} catch (Exception e) {
@@ -358,6 +373,28 @@ public class DashbroadScreen extends JFrame {
 		table = new JTable();
 		scrollPane.setViewportView(table);
 
+		JButton btnLogout = new JButton("Log out");
+		btnLogout.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				try {
+
+					JDialog.setDefaultLookAndFeelDecorated(true);
+					int response = JOptionPane.showConfirmDialog(null, "Do you want to log out?", "Confirm",
+							JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+					if (response == JOptionPane.YES_OPTION) {
+						setVisible(false);
+						LoginScreen loginScreen = new LoginScreen();
+						loginScreen.setVisible(true);
+
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+		btnLogout.setFont(new Font("Dialog", Font.BOLD, 13));
+		btnLogout.setBounds(884, 0, 98, 26);
+		contentPane.add(btnLogout);
 		mnEmployee.addActionListener(new ActionListener() {
 
 			@Override

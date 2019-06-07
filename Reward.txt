@@ -1,3 +1,0 @@
-1,Giải nhất,3,55555555555555
-2,Giải nhì,2,hhhhh
-3,Giải ba,6,tffffffffffff

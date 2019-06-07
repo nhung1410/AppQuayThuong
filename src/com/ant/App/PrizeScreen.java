@@ -9,10 +9,14 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +26,7 @@ import java.util.Vector;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -64,38 +69,42 @@ public class PrizeScreen extends JFrame {
 			}
 		});
 	}
-
+	
 	private ArrayList<Reward> readFileReward() {
+		File file = new File("Reward.txt");;
 		ArrayList<Reward> list = new ArrayList<Reward>();
-		File file = new File("Reward.txt");
+		BufferedReader br = null;
 		try {
-			FileReader fr = new FileReader(file);
-			BufferedReader br = new BufferedReader(fr);
+			if(file.exists() == true) {
+			 br = new BufferedReader(new FileReader(file));
 			String data = br.readLine();
 
 			while (data != null) {
 				String token[] = data.split(",");
-
-
 				Reward reward = new Reward();
-
+				
 				reward.setId(Integer.parseInt(token[0]));
 				reward.setClazz(token[1]);
 				reward.setTurns(Integer.parseInt(token[2]));
 				reward.setPrize(token[3]);
 
 				list.add(reward);
-
-				System.out.println("asdsad" + list.size());
 				data = br.readLine();
 
 			}
-			br.close();
-			fr.close();
-		} catch (Exception e) {
+
+			}
+			else {
+				
+			}
+				
+			
+		} catch (IOException e) {
 			// TODO: handle exception
+			System.err.println("Error: " + e.getMessage());
 			e.printStackTrace();
 		}
+	
 		return list;
 	}
 
@@ -103,10 +112,9 @@ public class PrizeScreen extends JFrame {
 
 		File f = new File("Reward.txt");
 		FileWriter fw = new FileWriter(f, true);
-
-
+		BufferedWriter bw = null;
 		try {
-			BufferedWriter bw = new BufferedWriter(fw);
+			 bw = new BufferedWriter(fw);
 			bw.write(reward.toString());
 			bw.newLine();
 			bw.flush();
@@ -115,6 +123,13 @@ public class PrizeScreen extends JFrame {
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
+		finally {
+			try {
+				bw.close();
+			} catch ( IOException e2) {
+				e2.printStackTrace();
+			}
+		}
 
 	}
 
@@ -122,19 +137,24 @@ public class PrizeScreen extends JFrame {
 
 		try {
 			int i = 0;
-			for (Reward reward : list) {
-				i++;
-				@SuppressWarnings("rawtypes")
-				Vector<Object> row = new Vector<Object>();
-				row.add(i);
-				row.add(reward.getId());
-				row.add(reward.getClazz());
-				row.add(reward.getTurns());
-				row.add(reward.getPrize());
-
-				model.addRow(row);
+			if (list != null) {
+				for (Reward reward : list) {
+					i++;
+					@SuppressWarnings("rawtypes")
+					Vector<Object> row = new Vector<Object>();
+					row.add(i);
+					row.add(reward.getId());
+					row.add(reward.getClazz());
+					row.add(reward.getTurns());
+					row.add(reward.getPrize());
+					row.add("Delete");
+					table.getColumn("Action").setCellRenderer(new ButtonRender());
+					table.getColumn("Action").setCellEditor(new ButtonEditor(new JCheckBox(), table));
+					model.addRow(row);
+				}
+			} else {
+				JOptionPane.showMessageDialog(this, "Add prize");
 			}
-
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -146,7 +166,6 @@ public class PrizeScreen extends JFrame {
 	 */
 	public PrizeScreen() {
 		ArrayList<Reward> readFileReward = readFileReward();
-		System.out.println("bbbbb" + readFileReward.size());
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 800, 700);
 		contentPane = new JPanel();
@@ -173,8 +192,6 @@ public class PrizeScreen extends JFrame {
 		contentPane.add(scrollPane);
 
 		table = new JTable() {
-			private static final long serialVersionUID = 1L;
-
 			public boolean isCellEditable(int row, int column) {
 				return false;
 			};
@@ -236,8 +253,8 @@ public class PrizeScreen extends JFrame {
 			public void mousePressed(MouseEvent e) {
 
 				int selectedRow = table.getSelectedRow();
+				int selectedColumn = table.getSelectedColumn();
 				int columnCount = model.getColumnCount();
-
 				for (int column = 0; column < columnCount; column++) {
 					if ("Class".equals(table.getColumnName(column))) {
 						cbbClass.setSelectedItem(table.getValueAt(selectedRow, column).toString());
@@ -246,9 +263,11 @@ public class PrizeScreen extends JFrame {
 						txtTurns.setText(table.getValueAt(selectedRow, column).toString());
 					} else if ("Prize".equals(table.getColumnName(column))) {
 						edtPrize.setText(table.getValueAt(selectedRow, column).toString());
+
 					} else {
 
 					}
+
 				}
 //				table.getValueAt(selectedRow, 1);
 
@@ -349,6 +368,29 @@ public class PrizeScreen extends JFrame {
 
 			}
 		});
+
+		JButton btnLogout = new JButton("Log out");
+		btnLogout.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				try {
+
+					JDialog.setDefaultLookAndFeelDecorated(true);
+					int response = JOptionPane.showConfirmDialog(null, "Do you want to log out?", "Confirm",
+							JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+					if (response == JOptionPane.YES_OPTION) {
+						setVisible(false);
+						LoginScreen loginScreen = new LoginScreen();
+						loginScreen.setVisible(true);
+
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+		btnLogout.setFont(new Font("Dialog", Font.BOLD, 13));
+		btnLogout.setBounds(884, 0, 98, 26);
+		contentPane.add(btnLogout);
 		btnUpdate.setBounds(513, 89, 98, 30);
 		editPanel.add(btnUpdate);
 		mnEmployee.addActionListener(new ActionListener() {

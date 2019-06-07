@@ -1,12 +1,12 @@
 package com.ant.App;
 
-import java.awt.BorderLayout;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.border.EmptyBorder;
+
 import com.ant.entities.*;
 
 import javax.swing.JLabel;
@@ -42,7 +42,8 @@ public class RegisterScreen extends JFrame {
 	private JTextField txtRePassword;
 	private JTextField txtAddress;
 	private JTextField txtName;
-	ArrayList<User> list =new ArrayList<User>();
+	JLabel lblUserNamewarn;
+	ArrayList<User> list = new ArrayList<User>();
 
 	/**
 	 * Launch the application.
@@ -70,7 +71,7 @@ public class RegisterScreen extends JFrame {
 		try {
 			BufferedWriter bw = new BufferedWriter(fw);
 			BufferedReader br = new BufferedReader(fr);
-			
+
 			while (br.readLine() != null) {
 				i++;
 			}
@@ -86,6 +87,19 @@ public class RegisterScreen extends JFrame {
 			System.out.println(e.getMessage());
 		}
 
+	}
+
+	private void checkUser(String username) {
+
+		if (username.matches("[\\\\!\"#$%&()*+,./:;<=>?@\\[\\]^_{|}~]+") || username.matches("[1-9]")) {
+
+			lblUserNamewarn.setText("You can use letters(a-z, A_Z) & periods");
+			txtUserName.setText("");
+
+		} else {
+			lblUserNamewarn.setText("Enter your username");
+
+		}
 	}
 
 	/**
@@ -120,7 +134,7 @@ public class RegisterScreen extends JFrame {
 		panel.add(txtUserName);
 		txtUserName.setColumns(10);
 
-		JLabel lblUserNamewarn = new JLabel("");
+		lblUserNamewarn = new JLabel("");
 		lblUserNamewarn.setFont(new Font("Dialog", Font.ITALIC, 12));
 		lblUserNamewarn.setForeground(Color.RED);
 		lblUserNamewarn.setBounds(161, 49, 257, 16);
@@ -233,13 +247,17 @@ public class RegisterScreen extends JFrame {
 
 				try {
 
-					user.setUserName(txtUserName.getText());
-					user.setName(txtName.getText());
+					if(txtName.getText()!=null) {
+						checkUser(txtName.getText());
+						user.setName(txtName.getText());
+					}
+					
 					user.setPassword(txtPassword.getText());
 					user.setAddress(txtAddress.getText());
 					user.setDateOfBirth(txtbirthDate.getDate());
 
-					
+					user.setUserName(txtUserName.getText());
+
 					list.add(user);
 
 					writeFileLogin();
@@ -248,14 +266,6 @@ public class RegisterScreen extends JFrame {
 					setVisible(false);
 				} catch (Exception e) {
 					e.printStackTrace();
-				}
-
-				if (txtUserName.getText().matches("[\\\\!\"#$%&()*+,./:;<=>?@\\[\\]^_{|}~]+")
-						|| txtUserName.getText().matches("[1-9]")) {
-
-					lblUserNamewarn.setText("You can use letters(a-z, A_Z) & periods");
-				} else if (txtUserName.getText().equals("")) {
-					lblUserNamewarn.setText("Enter Username");
 				}
 
 			}
