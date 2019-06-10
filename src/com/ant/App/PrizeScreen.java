@@ -341,6 +341,7 @@ public class PrizeScreen extends JFrame {
 //					Scanner r = new Scanner(f);
 
 					List<String> lines = FileUtils.readLines(f, "UTF-8");
+					
 
 					for (String st : lines) {
 						String[] token = st.split(",");

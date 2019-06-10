@@ -1,4 +1,4 @@
-package com.ant.App;
+package src.com.ant.App;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
@@ -21,6 +21,8 @@ import java.util.Vector;
 import java.util.stream.IntStream;
 
 import com.ant.App.ListEmployeeScreen;
+import com.ant.App.LoginScreen;
+import com.ant.App.PrizeScreen;
 import com.ant.entities.DetailReward;
 import com.ant.entities.Reward;
 import com.ant.entities.User;

@@ -1,4 +1,4 @@
-package com.ant.App;
+package src.com.ant.App;
 
 import java.awt.EventQueue;
 import java.awt.Font;
