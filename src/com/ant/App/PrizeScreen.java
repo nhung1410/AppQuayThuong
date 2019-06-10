@@ -9,18 +9,17 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -41,12 +40,12 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.xmlbeans.XmlCursor.TokenType;
-
 import com.ant.Util.ButtonEditor;
 import com.ant.Util.ButtonRender;
+import com.ant.Util.SqliteConnection;
 import com.ant.entities.Reward;
-import com.ant.entities.User;
+import java.sql.*;
+import java.sql.Connection;
 
 public class PrizeScreen extends JFrame {
 
@@ -132,6 +131,49 @@ public class PrizeScreen extends JFrame {
 		}
 
 	}
+	
+	private void copyFile() throws IOException {
+
+        File source = new File("Reward.txt");
+        File dest = new File("TurnReward.txt");
+ 
+        InputStream is = null;
+        OutputStream os = null;
+ 
+        try {
+            if(dest.exists() == false) {
+            is = new FileInputStream(source);
+            os = new FileOutputStream(dest);
+             
+            byte[] buffer = new byte[1024];
+            int length;
+             
+            while ((length = is.read(buffer)) > 0) {
+                 
+                os.write(buffer, 0, length);
+            }
+            }
+            else {
+				
+			}
+             
+        }catch (Exception e) {
+			// TODO: handle exception
+		} finally {
+ 
+            if (is != null) {
+                is.close();
+            }
+ 
+            if (os != null) {
+                os.close();
+            }
+        }
+    }
+
+
+	
+	
 
 	private void showFileInTable(ArrayList<Reward> list, DefaultTableModel model) {
 
@@ -140,7 +182,7 @@ public class PrizeScreen extends JFrame {
 			if (list != null) {
 				for (Reward reward : list) {
 					i++;
-					@SuppressWarnings("rawtypes")
+				
 					Vector<Object> row = new Vector<Object>();
 					row.add(i);
 					row.add(reward.getId());
@@ -160,11 +202,23 @@ public class PrizeScreen extends JFrame {
 		}
 
 	}
+	
+	Connection conn = null;
+	
 
 	/**
 	 * Create the frame.
+	 * 
 	 */
-	public PrizeScreen() {
+	public PrizeScreen()  {
+		conn = SqliteConnection.dbConnector();
+		try {
+			
+			copyFile();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		ArrayList<Reward> readFileReward = readFileReward();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 800, 700);
@@ -336,7 +390,7 @@ public class PrizeScreen extends JFrame {
 
 				File f = new File("Reward.txt");
 				ArrayList<String> list = new ArrayList<String>();
-//				String str = "";
+
 				try {
 //					Scanner r = new Scanner(f);
 

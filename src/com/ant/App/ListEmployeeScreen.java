@@ -1,9 +1,11 @@
-package src.com.ant.App;
+package com.ant.App;
 
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.util.*;
 import com.ant.entities.*;
+
+import com.ant.entities.User;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -17,6 +19,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.ant.Util.FileTypeFilter;
+import com.ant.Util.SqliteConnection;
 
 import javax.swing.JTable;
 import javax.swing.JMenuBar;
@@ -32,6 +35,8 @@ import javax.swing.JTextField;
 import javax.swing.JScrollPane;
 import java.io.*;
 import java.awt.SystemColor;
+import java.sql.*;
+import java.sql.Connection;
 
 public class ListEmployeeScreen extends JFrame {
 
@@ -69,10 +74,9 @@ public class ListEmployeeScreen extends JFrame {
 		
 			try {
 				if(file.exists() == true) {
-				FileReader fr = new FileReader(file);
-				BufferedReader br = new BufferedReader(fr);
-				String data = br.readLine();
-				while (data != null) {
+					List<String> lines = FileUtils.readLines(file, "UTF-8");
+					int i =0;
+					for (String data : lines) {
 					String token[] = data.split(",");
 					User user = new User();
 					user.setId(Integer.parseInt(token[0]));
@@ -81,10 +85,9 @@ public class ListEmployeeScreen extends JFrame {
 					user.setAddress(token[5]);
 
 					list.add(user);
-					data = br.readLine();
+				
 				}
-				br.close();
-				fr.close();
+	
 				}
 				else {
 					
@@ -156,14 +159,14 @@ public class ListEmployeeScreen extends JFrame {
 			System.out.println(e.getMessage());
 		}
 	}
-	
+	Connection conn = null;
 	
 
 	/**
 	 * Create the frame.
 	 */
 	public ListEmployeeScreen() {
-
+		conn = SqliteConnection.dbConnector();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 800, 700);
 		contentPane = new JPanel();

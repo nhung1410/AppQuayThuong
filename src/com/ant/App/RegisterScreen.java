@@ -7,6 +7,7 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.border.EmptyBorder;
 
+import com.ant.Util.SqliteConnection;
 import com.ant.entities.*;
 
 import javax.swing.JLabel;
@@ -28,11 +29,16 @@ import java.awt.Font;
 import javax.swing.JTextField;
 
 import com.toedter.calendar.JDateChooser;
+
+import com.ant.entities.User;
+
 import javax.swing.JButton;
 
 import java.awt.Color;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.sql.*;
+import java.sql.Connection;
 
 public class RegisterScreen extends JFrame {
 
@@ -101,11 +107,13 @@ public class RegisterScreen extends JFrame {
 
 		}
 	}
+	Connection conn;
 
 	/**
 	 * Create the frame.
 	 */
 	public RegisterScreen() {
+		conn = SqliteConnection.dbConnector();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 507, 518);
 		contentPane = new JPanel();

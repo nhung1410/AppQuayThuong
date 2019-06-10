@@ -9,8 +9,9 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
-import com.ant.entities.User;
 import com.toedter.calendar.JDateChooser;
+import com.ant.Util.SqliteConnection;
+import com.ant.entities.User;
 
 import javax.swing.JLabel;
 import java.awt.Font;
@@ -26,6 +27,8 @@ import java.util.Calendar;
 import java.util.Scanner;
 import java.awt.event.ActionEvent;
 import java.awt.Color;
+import java.sql.*;
+import java.sql.Connection;
 
 public class ProfileScreen extends JFrame {
 
@@ -64,7 +67,9 @@ public class ProfileScreen extends JFrame {
 	 * Create the frame.
 	 */
 
+	Connection conn;
 	public ProfileScreen(User _user) {
+		conn = SqliteConnection.dbConnector();
 		setUser(_user);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 1000, 700);

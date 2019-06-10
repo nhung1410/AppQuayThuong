@@ -8,39 +8,26 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.border.EmptyBorder;
 
+import com.ant.Util.SqliteConnection;
 import com.ant.entities.*;
 
 import org.apache.commons.codec.binary.StringUtils;
 import org.apache.poi.util.StringUtil;
 import org.omg.CORBA.PUBLIC_MEMBER;
 
-import javax.sound.sampled.Line;
-import javax.swing.BoxLayout;
+
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.JButton;
-import javax.swing.JDialog;
-
 import java.awt.event.ActionListener;
-import java.beans.Visibility;
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Array;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.stream.Stream;
 import java.awt.event.ActionEvent;
-import java.awt.Choice;
-import com.toedter.components.JSpinField;
+import com.ant.entities.User;
+import java.sql.*;
+import java.sql.Connection;
+
 import java.awt.Color;
 import java.awt.Font;
 
@@ -118,7 +105,6 @@ public class LoginScreen extends JFrame {
 			}
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			try {
@@ -129,12 +115,10 @@ public class LoginScreen extends JFrame {
 		}
 	}
 
-	private void CheckUser() {
-		// TODO Auto-generated method stub
-
-	}
+	Connection conn;
 
 	public LoginScreen() {
+		conn = SqliteConnection.dbConnector();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 400, 300);
 		LoginPanel = new JPanel();

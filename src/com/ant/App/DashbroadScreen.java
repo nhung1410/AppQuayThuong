@@ -1,4 +1,4 @@
-package src.com.ant.App;
+package com.ant.App;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.TreeMap;
 import java.util.Vector;
 import java.util.stream.IntStream;
 
@@ -25,7 +26,7 @@ import com.ant.App.LoginScreen;
 import com.ant.App.PrizeScreen;
 import com.ant.entities.DetailReward;
 import com.ant.entities.Reward;
-import com.ant.entities.User;
+import com.ant.entities.TurnReward;
 
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
@@ -118,16 +119,16 @@ public class DashbroadScreen extends JFrame {
 			} else {
 
 			}
-			if(array.size()>0) {
+			if (array.size() > 0) {
 				_min = Double.parseDouble(array.get(0));
 				for (int i = 0; i < array.size(); i++) {
 					double temp = Double.parseDouble(array.get(i));
 					if (temp < _min) {
 						_min = temp;
 					} else {
-						
+
 					}
-			}
+				}
 				int result = (int) _min + ran.nextInt(array.size());
 
 				String t1 = String.valueOf(result / 1000);
@@ -138,13 +139,10 @@ public class DashbroadScreen extends JFrame {
 				txt2.setText(t2);
 				txt3.setText(t3);
 				txt4.setText(t4);
-			
-			}else {
-				JOptionPane.showMessageDialog(null,
-					    "Chọn thêm nhân viên để quay thưởng !");
-			}
 
-			
+			} else {
+				JOptionPane.showMessageDialog(null, "Chọn thêm nhân viên để quay thưởng !");
+			}
 
 //			for(int  i =min ;i<(min +countLine);i++) {
 //				if(result == arr[i] ) {
@@ -158,7 +156,6 @@ public class DashbroadScreen extends JFrame {
 //
 //			}
 
-			
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
@@ -169,32 +166,70 @@ public class DashbroadScreen extends JFrame {
 	private JTextField txtTurn;
 	private JTable table;
 
-	private void readFileReward() {
-		File file = new File("Reward.txt");
+
+	private void readFileTurnReward() {
+		File file = new File("TurnReward.txt");
+
 		try {
-			if(file.exists() == true) {
-			List<String> lines = FileUtils.readLines(file, "UTF-8");
-			for (String st : lines) {
-				String token[] = st.split(",");
-				txtClazz.setText(token[1]);
-
-				rewardId = Integer.parseInt(token[0]);
-				turn = Integer.parseInt(token[2]);
-
-			}}
-			else {
+			if (file.exists() == true) {
+				List<String> lines = FileUtils.readLines(file, "UTF-8");
 				
+				for (String st : lines) {
+					String token[] = st.split(",");
+					if (Integer.parseInt(token[2]) > 0) {
+						rewardId = Integer.parseInt(token[0]);
+						txtClazz.setText(token[1]);
+						turn = Integer.parseInt(token[2]);
+
+					}
+
+				}
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void updateFileReward() {
+		File file = new File("TurnReward.txt");
+		ArrayList<String> list = new ArrayList<String>();
+		try {
+			if (file.exists() == true) {
+				List<String> lines = FileUtils.readLines(file, "UTF-8");
+				for (String st : lines) {
+					String token[] = st.split(",");
+
+					if (rewardId == Integer.parseInt(token[0])) {
+						list.add(token[0] + "," + token[1] + "," + txtTurn.getText() + "," + token[3]);
+					}
+
+					else {
+						list.add(st);
+					}
+				}
+
+			} else {
+
 			}
 
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
 		}
+		try (PrintWriter pw = new PrintWriter(file)) {
+			for (String s : list) {
+				pw.println(s);
+			}
+
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
 	}
 
-	private void updateFileReward() {
-
-	}
+	
+	
+	
 
 	private void writeFileDetailReward(DetailReward dere) {
 		File file = new File("RewardDetail.txt");
@@ -233,7 +268,7 @@ public class DashbroadScreen extends JFrame {
 	 */
 	public DashbroadScreen() {
 		ArrayList<Reward> reList = new ArrayList<Reward>();
-
+		 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 1000, 700);
 		contentPane = new JPanel();
@@ -271,8 +306,8 @@ public class DashbroadScreen extends JFrame {
 		txtTurn.setBounds(244, 321, 100, 30);
 		panel.add(txtTurn);
 
-		readFileReward();
-
+		readFileTurnReward();
+		
 		txtM = new JTextField();
 		txtM.setHorizontalAlignment(SwingConstants.CENTER);
 		txtM.setText("M");
@@ -348,6 +383,11 @@ public class DashbroadScreen extends JFrame {
 					writeFileDetailReward(dere);
 
 					turn--;
+					txtTurn.setText(String.valueOf(turn));
+					updateFileReward();
+
+					readFileTurnReward();
+
 //					System.out.println(turn);
 				} catch (Exception e) {
 					// TODO: handle exception
