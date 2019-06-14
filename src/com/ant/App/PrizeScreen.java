@@ -1,5 +1,6 @@
 package com.ant.App;
 
+import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.SystemColor;
@@ -22,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -39,20 +42,35 @@ import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
+
 import org.apache.commons.io.FileUtils;
-import com.ant.Util.ButtonEditor;
+
+
 import com.ant.Util.ButtonRender;
 import com.ant.Util.SqliteConnection;
 import com.ant.entities.Reward;
+import com.ant.entities.User;
+
+
 import java.sql.*;
-import java.sql.Connection;
 
 public class PrizeScreen extends JFrame {
 
 	private JPanel contentPane;
 	private JTable table;
 	private JTextField txtTurns;
+	private JComboBox cbbClass;
+	private JEditorPane edtPrize;
+	private User user;
+	private Action action;
 
+	private User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
 	/**
 	 * Launch the application.
 	 */
@@ -68,158 +86,102 @@ public class PrizeScreen extends JFrame {
 			}
 		});
 	}
-	
-	private ArrayList<Reward> readFileReward() {
-		File file = new File("Reward.txt");;
-		ArrayList<Reward> list = new ArrayList<Reward>();
-		BufferedReader br = null;
+
+	private void Add() {
+
 		try {
-			if(file.exists() == true) {
-			 br = new BufferedReader(new FileReader(file));
-			String data = br.readLine();
-
-			while (data != null) {
-				String token[] = data.split(",");
-				Reward reward = new Reward();
-				
-				reward.setId(Integer.parseInt(token[0]));
-				reward.setClazz(token[1]);
-				reward.setTurns(Integer.parseInt(token[2]));
-				reward.setPrize(token[3]);
-
-				list.add(reward);
-				data = br.readLine();
-
-			}
-
-			}
-			else {
-				
-			}
-				
-			
-		} catch (IOException e) {
-			// TODO: handle exception
-			System.err.println("Error: " + e.getMessage());
-			e.printStackTrace();
-		}
-	
-		return list;
-	}
-
-	private void writeFileReward(Reward reward) throws IOException {
-
-		File f = new File("Reward.txt");
-		FileWriter fw = new FileWriter(f, true);
-		BufferedWriter bw = null;
-		try {
-			 bw = new BufferedWriter(fw);
-			bw.write(reward.toString());
-			bw.newLine();
-			bw.flush();
-			bw.close();
-
+			Connection conn = SqliteConnection.dbConnector();
+			String queryInsert = "insert into reward(name,turn,prize,t) values(?,?,?,?) ";
+			PreparedStatement pstInsert = conn.prepareStatement(queryInsert);
+			pstInsert.setString(1, cbbClass.getSelectedItem().toString());
+			pstInsert.setInt(2, Integer.parseInt(txtTurns.getText()));
+			pstInsert.setString(3, edtPrize.getText());
+			pstInsert.setInt(4, 0);
+			int executeUpdate = pstInsert.executeUpdate();
+			pstInsert.close();
+			conn.close();
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			JOptionPane.showMessageDialog(null, e.getMessage());
+		}
+
+	}
+	
+	private void updateDataReward(int id, String name, int turn, String prize) {
+		Connection conn = null;
+		PreparedStatement statement = null;
+		ResultSet res = null;
+		try {
+			conn = SqliteConnection.dbConnector();
+			Connection connector = SqliteConnection.dbConnector();
+			statement = conn.prepareStatement("update reward set name = ? , turn = ?, prize =? where id = ?");
+			statement.setString(1, name);
+			statement.setInt(2, turn);
+			statement.setString(3, prize);
+			statement.setInt(4, id);
+			statement.execute();
+		} catch (Exception e) {
+			// TODO: handle exception
 		}
 		finally {
 			try {
-				bw.close();
-			} catch ( IOException e2) {
-				e2.printStackTrace();
+				res.close();
+				statement.close();
+				conn.close();
+			} catch (Exception e2) {
+				// TODO: handle exception
 			}
 		}
-
 	}
-	
-	private void copyFile() throws IOException {
 
-        File source = new File("Reward.txt");
-        File dest = new File("TurnReward.txt");
- 
-        InputStream is = null;
-        OutputStream os = null;
- 
-        try {
-            if(dest.exists() == false) {
-            is = new FileInputStream(source);
-            os = new FileOutputStream(dest);
-             
-            byte[] buffer = new byte[1024];
-            int length;
-             
-            while ((length = is.read(buffer)) > 0) {
-                 
-                os.write(buffer, 0, length);
-            }
-            }
-            else {
-				
-			}
-             
-        }catch (Exception e) {
-			// TODO: handle exception
-		} finally {
- 
-            if (is != null) {
-                is.close();
-            }
- 
-            if (os != null) {
-                os.close();
-            }
-        }
-    }
-
-
-	
-	
-
-	private void showFileInTable(ArrayList<Reward> list, DefaultTableModel model) {
-
+	private void showDataInTable(DefaultTableModel model) {
+		Connection conn = null;
+		PreparedStatement statement = null;
+		ResultSet res = null;
 		try {
-			int i = 0;
-			if (list != null) {
-				for (Reward reward : list) {
-					i++;
+			conn = SqliteConnection.dbConnector();
+			statement = conn.prepareStatement("SELECT * from reward");
+			res = statement.executeQuery();
+			
+			while (res.next()) {
 				
-					Vector<Object> row = new Vector<Object>();
-					row.add(i);
-					row.add(reward.getId());
-					row.add(reward.getClazz());
-					row.add(reward.getTurns());
-					row.add(reward.getPrize());
-					row.add("Delete");
-					table.getColumn("Action").setCellRenderer(new ButtonRender());
-					table.getColumn("Action").setCellEditor(new ButtonEditor(new JCheckBox(), table));
-					model.addRow(row);
-				}
-			} else {
-				JOptionPane.showMessageDialog(this, "Add prize");
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+				String id = res.getString(1);
+				String name = res.getString(2);
+				String turn = res.getString(3);
+				String prize = res.getString(4);
+				String t = res.getString(5);
+				Vector<Object> row = new Vector<Object>();
+				row.add(id);
+				row.add(name);
+				row.add(turn);
+				row.add(prize);
+				row.add(t);
 
+				ButtonRender buttonRender = new ButtonRender();
+				table.getColumn("Action").setCellRenderer(buttonRender);
+
+				model.addRow(row);
+			}
+
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(null, e.getMessage());
+		} finally {
+			try {
+				res.close();
+				statement.close();
+				conn.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 	}
-	
-	Connection conn = null;
-	
 
 	/**
 	 * Create the frame.
 	 * 
 	 */
-	public PrizeScreen()  {
-		conn = SqliteConnection.dbConnector();
-		try {
-			
-			copyFile();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		ArrayList<Reward> readFileReward = readFileReward();
+	public PrizeScreen() {
+
+//		ArrayList<Reward> readFileReward = readFileReward();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 800, 700);
 		contentPane = new JPanel();
@@ -228,7 +190,7 @@ public class PrizeScreen extends JFrame {
 		contentPane.setLayout(null);
 
 		JMenuBar menuBar = new JMenuBar();
-		menuBar.setBounds(0, 0, 300, 30);
+		menuBar.setBounds(0, 0, 370, 30);
 		contentPane.add(menuBar);
 
 		JMenuItem mnEmployee = new JMenuItem("Employee");
@@ -240,6 +202,9 @@ public class PrizeScreen extends JFrame {
 
 		JMenuItem mnDb = new JMenuItem("Dashbroad");
 		menuBar.add(mnDb);
+
+		JMenuItem mnProfile = new JMenuItem("Profile");
+		menuBar.add(mnProfile);
 
 		JScrollPane scrollPane = new JScrollPane(table);
 		scrollPane.setBounds(48, 72, 694, 267);
@@ -254,11 +219,11 @@ public class PrizeScreen extends JFrame {
 		scrollPane.setViewportView(table);
 
 		DefaultTableModel model = new DefaultTableModel();
-		model.addColumn("NO");
 		model.addColumn("ID");
 		model.addColumn("Class");
 		model.addColumn("Turns");
 		model.addColumn("Prize");
+		model.addColumn("Turn number");
 		model.addColumn("Action");
 		table.setModel(model);
 
@@ -282,9 +247,9 @@ public class PrizeScreen extends JFrame {
 		lblPrize.setBounds(12, 107, 55, 30);
 		editPanel.add(lblPrize);
 
-		String[] item = { "Giải nhất", "Giải nhì", "Giải ba" };
+		String[] item = { "Giải ba", "Giải nhì","Giải nhất"  };
 
-		JComboBox cbbClass = new JComboBox(item);
+		cbbClass = new JComboBox(item);
 		cbbClass.setBounds(85, 15, 190, 30);
 		editPanel.add(cbbClass);
 
@@ -298,7 +263,7 @@ public class PrizeScreen extends JFrame {
 		editPanel.add(panel);
 		panel.setLayout(null);
 
-		JEditorPane edtPrize = new JEditorPane();
+		edtPrize = new JEditorPane();
 		edtPrize.setBounds(0, 0, 293, 119);
 		panel.add(edtPrize);
 
@@ -328,30 +293,53 @@ public class PrizeScreen extends JFrame {
 			}
 		});
 
-		showFileInTable(readFileReward, model);
+//		showFileInTable(readFileReward, model);
+		showDataInTable(model);
 
 		JButton btnAdd = new JButton("Add");
 		btnAdd.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				Add();
+				Connection conn = null;
+				PreparedStatement statement = null;
+				ResultSet res = null;
 				try {
+					
+					conn = SqliteConnection.dbConnector();
+					statement = conn.prepareStatement("SELECT * from reward where id = (select max(id) from reward)");
+					res = statement.executeQuery();
+				
+					String id = res.getString(1);
+					String name = res.getString(2);
+					String turn = res.getString(3);
+					String prize = res.getString(4);
+					String t = res.getString(5);
+						Vector<Object> row = new Vector<Object>();
+						row.add(id);
+						row.add(name);
+						row.add(turn);
+						row.add(prize);
+						row.add(t);
 
-					Reward reward = new Reward(cbbClass.getItemAt(cbbClass.getSelectedIndex()).toString(),
-							Integer.parseInt(txtTurns.getText()), edtPrize.getText());
+						ButtonRender buttonRender = new ButtonRender();
+						table.getColumn("Action").setCellRenderer(buttonRender);
 
-					Vector row = new Vector();
-					row.add(model.getRowCount() + 1);
-					row.add(reward.getId());
-					row.add(reward.getClazz());
-					row.add(reward.getTurns());
-					row.add(reward.getPrize());
-					row.add("Delete");
-					table.getColumn("Action").setCellRenderer(new ButtonRender());
-					table.getColumn("Action").setCellEditor(new ButtonEditor(new JCheckBox(), table));
+						model.addRow(row);
+//
+					
+//
+//					Vector row = new Vector();
+//					row.add(reward.getId());
+//					row.add(reward.getClazz());
+//					row.add(reward.getTurns());
+//					row.add(reward.getPrize());
+//					row.add(reward.getT());
+//					row.add("Delete");
+//					table.getColumn("Action").setCellRenderer(new ButtonRender());
+//
+//					model.addRow(row);
 
-					model.addRow(row);
-
-					writeFileReward(reward);
-
+					
 					table.setModel(model);
 					table.setVisible(true);
 					contentPane.updateUI();
@@ -359,6 +347,14 @@ public class PrizeScreen extends JFrame {
 					edtPrize.setText("");
 				} catch (Exception e) {
 					e.printStackTrace();
+				}finally {
+					try {
+						res.close();
+						statement.close();
+						conn.close();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 				}
 			}
 		});
@@ -387,39 +383,40 @@ public class PrizeScreen extends JFrame {
 
 					}
 				}
+//			 Object selectedItem = cbbClass.getSelectedItem();
+				updateDataReward(Integer.parseInt(id),cbbClass.getSelectedItem().toString() , Integer.parseInt(txtTurns.getText()),edtPrize.getText());
+				
+//				File f = new File("Reward.txt");
+//				ArrayList<String> list = new ArrayList<String>();
 
-				File f = new File("Reward.txt");
-				ArrayList<String> list = new ArrayList<String>();
-
-				try {
-//					Scanner r = new Scanner(f);
-
-					List<String> lines = FileUtils.readLines(f, "UTF-8");
-					
-
-					for (String st : lines) {
-						String[] token = st.split(",");
-
-						if (token[0].equals(id)) {
-							list.add(token[0] + "," + cbbClass.getSelectedItem() + "," + txtTurns.getText() + ","
-									+ edtPrize.getText());
-						} else {
-							list.add(st);
-						}
-					}
-
-				} catch (Exception e) {
-					// TODO: handle exception
-					e.printStackTrace();
-				}
-				try (PrintWriter pw = new PrintWriter(f)) {
-					for (String s : list) {
-						pw.println(s);
-					}
-
-				} catch (Exception e) {
-					// TODO: handle exception
-				}
+//				try {
+////					Scanner r = new Scanner(f);
+//
+//					List<String> lines = FileUtils.readLines(f, "UTF-8");
+//
+//					for (String st : lines) {
+//						String[] token = st.split(",");
+//
+//						if (token[0].equals(id)) {
+//							list.add(token[0] + "," + cbbClass.getSelectedItem() + "," + txtTurns.getText() + ","
+//									+ edtPrize.getText());
+//						} else {
+//							list.add(st);
+//						}
+//					}
+//
+//				} catch (Exception e) {
+//					// TODO: handle exception
+//					e.printStackTrace();
+//				}
+//				try (PrintWriter pw = new PrintWriter(f)) {
+//					for (String s : list) {
+//						pw.println(s);
+//					}
+//
+//				} catch (Exception e) {
+//					// TODO: handle exception
+//				}
 
 			}
 		});
@@ -459,14 +456,14 @@ public class PrizeScreen extends JFrame {
 			}
 		});
 
-		mnDb.addActionListener(new ActionListener() {
+//		mnDb.addActionListener(new ActionListener() {
 
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				DashbroadScreen dashbroadScreen = new DashbroadScreen();
-				dashbroadScreen.setVisible(true);
-				setVisible(false);
-			}
-		});
+//			@Override
+//			public void actionPerformed(ActionEvent e) {
+//				DashbroadScreen dashbroadScreen = new DashbroadScreen(_user);
+//				dashbroadScreen.setVisible(true);
+//				setVisible(false);
+//			}
+//		});
 	}
 }

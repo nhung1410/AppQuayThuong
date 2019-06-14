@@ -1,2 +1,0 @@
-1007,nhung,112233,Nhung,22,Ha noi
-1008,tung,112233,Tung,25,ha nam

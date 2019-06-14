@@ -66,30 +66,6 @@ public class Reward {
 		this.prize = prize;
 	}
 
-	public Reward(String clazz, int turns, String prize) {
-		File f = new File("Reward.txt");
-		try {
-			FileWriter fw = new FileWriter(f, true);
-			FileReader fr = new FileReader(f);
-			int i = 1;
-			BufferedWriter bw = new BufferedWriter(fw);
-			BufferedReader br = new BufferedReader(fr);
-			while (br.readLine() != null) {
-
-				i++;
-			}
-
-			this.id = i;
-			this.clazz = clazz;
-			this.turns = turns;
-			this.prize = prize;
-			bw.flush();
-			bw.close();
-
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-	}
 	
 	
 	public Reward() {

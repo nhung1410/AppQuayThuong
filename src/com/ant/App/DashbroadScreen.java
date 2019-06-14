@@ -11,6 +11,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,9 +27,10 @@ import java.util.stream.IntStream;
 import com.ant.App.ListEmployeeScreen;
 import com.ant.App.LoginScreen;
 import com.ant.App.PrizeScreen;
+import com.ant.Util.SqliteConnection;
 import com.ant.entities.DetailReward;
 import com.ant.entities.Reward;
-import com.ant.entities.TurnReward;
+import com.ant.entities.User;
 
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
@@ -52,6 +56,7 @@ import javax.swing.SwingConstants;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import java.awt.Color;
 
 public class DashbroadScreen extends JFrame {
 
@@ -63,11 +68,18 @@ public class DashbroadScreen extends JFrame {
 	private JTextField txt2;
 	private JTextField txt3;
 	private JTextField txt4;
+	String _turn;
 	private JTextField txtClazz;
-	int rewardId;
-	int turn;
 
-	ArrayList<Reward> reList = new ArrayList<Reward>();
+	private User user;
+
+	private User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
 
 	/**
 	 * Launch the application.
@@ -85,77 +97,34 @@ public class DashbroadScreen extends JFrame {
 		});
 	}
 
-	public void RanIdEmployee() {
+	private void ActionStartBtn() {
 
-		ArrayList<String> array = new ArrayList<String>();
-		double _min = 0;
-		String[] array2;
 		Vector<Object> listEmp = new Vector<>();
 		listEmp = ListEmployeeScreen.getData();
-		File file = new File("Login.txt");
 
 		try {
-			if (file.exists() == true) {
-				FileReader fr = new FileReader(file);
-				BufferedReader br = new BufferedReader(fr);
-				String data = br.readLine();
-				while (data != null) {
-					String token[] = data.split(",");
-					data = br.readLine();
-					array.add(token[0]);
 
-				}
-				br.close();
-				fr.close();
-			} else {
-
-			}
 			Random ran = new Random();
 			if (listEmp != null) {
-				for (int i = 0; i < listEmp.size(); i++) {
-					array2 = listEmp.get(i).toString().split(",");
-					array.add(array2[1]);
-				}
-			} else {
 
-			}
-			if (array.size() > 0) {
-				_min = Double.parseDouble(array.get(0));
-				for (int i = 0; i < array.size(); i++) {
-					double temp = Double.parseDouble(array.get(i));
-					if (temp < _min) {
-						_min = temp;
-					} else {
+				int num = ran.nextInt(listEmp.size());
 
-					}
-				}
-				int result = (int) _min + ran.nextInt(array.size());
+				String[] arr = listEmp.get(num).toString().split(",");
 
-				String t1 = String.valueOf(result / 1000);
-				String t2 = String.valueOf((result / 100) % 10);
-				String t3 = String.valueOf((result % 100) / 10);
-				String t4 = String.valueOf(result % 10);
+				String t1 = String.valueOf(Integer.parseInt(arr[1].trim()) / 1000);
+				String t2 = String.valueOf((Integer.parseInt(arr[1].trim()) / 100) % 10);
+				String t3 = String.valueOf((Integer.parseInt(arr[1].trim()) % 100) / 10);
+				String t4 = String.valueOf(Integer.parseInt(arr[1].trim()) % 10);
 				txt1.setText(t1);
 				txt2.setText(t2);
 				txt3.setText(t3);
 				txt4.setText(t4);
+				updateRewardData();
 
 			} else {
 				JOptionPane.showMessageDialog(null, "Chọn thêm nhân viên để quay thưởng !");
 			}
 
-//			for(int  i =min ;i<(min +countLine);i++) {
-//				if(result == arr[i] ) {
-//					System.out.println(arr[i]);
-//					
-//					break;
-//				}
-//				else {
-//					
-//				}
-//
-//			}
-
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
@@ -163,112 +132,85 @@ public class DashbroadScreen extends JFrame {
 
 	}
 
-	private JTextField txtTurn;
-	private JTable table;
-
-
-	private void readFileTurnReward() {
-		File file = new File("TurnReward.txt");
-
+	private void showRewardData(ArrayList<Reward> reList) {
+		Connection conn = null;
+		PreparedStatement pst = null;
+		ResultSet rs = null;
 		try {
-			if (file.exists() == true) {
-				List<String> lines = FileUtils.readLines(file, "UTF-8");
-				
-				for (String st : lines) {
-					String token[] = st.split(",");
-					if (Integer.parseInt(token[2]) > 0) {
-						rewardId = Integer.parseInt(token[0]);
-						txtClazz.setText(token[1]);
-						turn = Integer.parseInt(token[2]);
+			conn = SqliteConnection.dbConnector();
+			pst = conn.prepareStatement("SELECT * from reward where  turn > t");
+			rs = pst.executeQuery();
 
-					}
+			while(rs.next()) {
+				int rewardId = rs.getInt(1);
+				String name = rs.getString(2);
+				int turn = rs.getInt(3);
+				String prize = rs.getString(4);
+				int t = rs.getInt(5);
 
-				}
-			}
+				Reward reward = new Reward();
+				reward.setId(rewardId);
+				reward.setClazz(name);
+				reward.setTurns(turn);
+				reward.setPrize(prize);
+				reward.setT(t);
+				reList.add(reward);
+			} 
 
 		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	private void updateFileReward() {
-		File file = new File("TurnReward.txt");
-		ArrayList<String> list = new ArrayList<String>();
-		try {
-			if (file.exists() == true) {
-				List<String> lines = FileUtils.readLines(file, "UTF-8");
-				for (String st : lines) {
-					String token[] = st.split(",");
-
-					if (rewardId == Integer.parseInt(token[0])) {
-						list.add(token[0] + "," + token[1] + "," + txtTurn.getText() + "," + token[3]);
-					}
-
-					else {
-						list.add(st);
-					}
-				}
-
-			} else {
-
-			}
-
-		} catch (Exception e) {
-			// TODO: handle exception
-			e.printStackTrace();
-		}
-		try (PrintWriter pw = new PrintWriter(file)) {
-			for (String s : list) {
-				pw.println(s);
-			}
-
-		} catch (Exception e) {
-			// TODO: handle exception
-		}
-	}
-
-	
-	
-	
-
-	private void writeFileDetailReward(DetailReward dere) {
-		File file = new File("RewardDetail.txt");
-
-		try {
-			FileWriter fw = new FileWriter(file, true);
-			FileReader fr = new FileReader(file);
-			int i = 0;
-			try {
-				BufferedWriter bw = new BufferedWriter(fw);
-				BufferedReader br = new BufferedReader(fr);
-
-				while (br.readLine() != null) {
-					i++;
-				}
-				dere.setId(i + 1);
-				bw.write(dere.toString());
-
-				bw.newLine();
-				bw.flush();
-				bw.close();
-
-			} catch (Exception e) {
-				System.out.println(e.getMessage());
-			}
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			JOptionPane.showMessageDialog(null, e.getMessage());
 		} finally {
-
+			try {
+				rs.close();
+				pst.close();
+				conn.close();
+			} catch (Exception e2) {
+				JOptionPane.showMessageDialog(null, e2.getMessage());
+			}
 		}
 	}
+
+	private void updateRewardData() {
+		Connection conn = null;
+		PreparedStatement statement = null;
+		ArrayList<Reward> reList = new ArrayList<Reward>();
+		Reward re = new Reward();
+
+		try {
+			conn = SqliteConnection.dbConnector();
+			statement = conn.prepareStatement("update reward set t =?  where id = ?");
+			showRewardData(reList);
+			while(!reList.isEmpty()) {
+
+				statement.setInt(1, reList.get(0).getT() + 1);
+				statement.setInt(2, reList.get(0).getId());
+				statement.execute();
+				txtClazz.setText(reList.get(0).getClazz().toString());
+				txtTurn.setText(String.valueOf(reList.get(0).getTurns() - reList.get(0).getT() - 1));
+			} 
+
+		} catch (Exception e) {
+			// TODO: handle exception
+		} finally {
+			try {
+
+//				pst.close();
+				statement.close();
+				conn.close();
+			} catch (Exception e2) {
+				JOptionPane.showMessageDialog(null, e2.getMessage());
+			}
+		}
+	}
+
+	private JTable table;
+	private JTextField txtTurn;
 
 	/**
 	 * Create the frame.
 	 */
 	public DashbroadScreen() {
-		ArrayList<Reward> reList = new ArrayList<Reward>();
-		 
+//		setUser(_user);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 1000, 700);
 		contentPane = new JPanel();
@@ -277,7 +219,7 @@ public class DashbroadScreen extends JFrame {
 		contentPane.setLayout(null);
 
 		JMenuBar menuBar = new JMenuBar();
-		menuBar.setBounds(0, 0, 300, 30);
+		menuBar.setBounds(0, 0, 413, 30);
 		contentPane.add(menuBar);
 
 		JMenuItem mnEmployee = new JMenuItem("Employee");
@@ -290,23 +232,35 @@ public class DashbroadScreen extends JFrame {
 		mnDb.setBackground(SystemColor.activeCaption);
 		menuBar.add(mnDb);
 
+		JMenuItem mnProfile = new JMenuItem("Profile");
+		menuBar.add(mnProfile);
+
 		JPanel panel = new JPanel();
 		panel.setBounds(12, 57, 958, 567);
 		contentPane.add(panel);
 		panel.setLayout(null);
 		txtClazz = new JTextField();
+		txtClazz.setForeground(Color.RED);
+		txtClazz.setFont(new Font("Tahoma", Font.BOLD, 14));
 		txtClazz.setEditable(false);
-		txtClazz.setBounds(244, 275, 100, 30);
+		txtClazz.setBounds(244, 275, 136, 30);
 		panel.add(txtClazz);
 		txtClazz.setColumns(10);
 
 		txtTurn = new JTextField();
+		txtTurn.setForeground(Color.BLUE);
 		txtTurn.setEditable(false);
+		txtTurn.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		txtTurn.setColumns(10);
-		txtTurn.setBounds(244, 321, 100, 30);
+		txtTurn.setBounds(244, 318, 136, 30);
 		panel.add(txtTurn);
 
-		readFileTurnReward();
+		ArrayList<Reward> reList = new ArrayList<Reward>();
+		showRewardData(reList);
+		while(!reList.isEmpty()) {
+		txtClazz.setText(reList.get(0).getClazz().toString());
+		txtTurn.setText(String.valueOf(reList.get(0).getTurns() - reList.get(0).getT()));
+		}
 		
 		txtM = new JTextField();
 		txtM.setHorizontalAlignment(SwingConstants.CENTER);
@@ -366,31 +320,15 @@ public class DashbroadScreen extends JFrame {
 		txt4.setColumns(10);
 		txt4.setBounds(436, 115, 50, 60);
 		panel.add(txt4);
-		txtTurn.setText(String.valueOf(turn));
 		JButton btnStart = new JButton("Start");
 		btnStart.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
 
-					RanIdEmployee();
+					ActionStartBtn();
 
-					DetailReward dere = new DetailReward();
-					String employeeId = txt1.getText() + txt2.getText() + txt3.getText() + txt4.getText();
-					dere.setEmployeeId(Integer.parseInt(employeeId));
-
-					dere.setRewardId(rewardId);
-
-					writeFileDetailReward(dere);
-
-					turn--;
-					txtTurn.setText(String.valueOf(turn));
-					updateFileReward();
-
-					readFileTurnReward();
-
-//					System.out.println(turn);
 				} catch (Exception e) {
-					// TODO: handle exception
+					e.printStackTrace();
 				}
 			}
 		});
@@ -446,15 +384,25 @@ public class DashbroadScreen extends JFrame {
 				setVisible(false);
 			}
 		});
-		mnPrize.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				PrizeScreen prizeScreen = new PrizeScreen();
-				prizeScreen.setVisible(true);
-				setVisible(false);
-
-			}
-		});
+//		mnPrize.addActionListener(new ActionListener() {
+//
+//			@Override
+//			public void actionPerformed(ActionEvent e) {
+//				PrizeScreen prizeScreen = new PrizeScreen(_user);
+//				prizeScreen.setVisible(true);
+//				setVisible(false);
+//
+//			}
+//		});
+//		mnProfile.addActionListener(new ActionListener() {
+//
+//			@Override
+//			public void actionPerformed(ActionEvent e) {
+//				ProfileScreen profileScreen = new ProfileScreen(_user);
+//				profileScreen.setVisible(true);
+//				setVisible(false);
+//
+//			}
+//		});
 	}
 }

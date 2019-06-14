@@ -24,7 +24,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import java.util.ArrayList;
-
+import java.util.Calendar;
 import java.awt.Font;
 import javax.swing.JTextField;
 
@@ -38,7 +38,6 @@ import java.awt.Color;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.sql.*;
-import java.sql.Connection;
 
 public class RegisterScreen extends JFrame {
 
@@ -239,6 +238,7 @@ public class RegisterScreen extends JFrame {
 		txtbirthDate.setBounds(161, 254, 159, 22);
 		panel.add(txtbirthDate);
 		txtbirthDate.setDateFormatString("dd/MM/yyyy");
+		
 
 		JLabel lblBirthWarn = new JLabel("");
 		lblBirthWarn.setForeground(Color.RED);
@@ -251,24 +251,40 @@ public class RegisterScreen extends JFrame {
 			@SuppressWarnings("resource")
 			public void actionPerformed(ActionEvent arg0) {
 				User user = new User();
-//				
+	
 
 				try {
 
-					if(txtName.getText()!=null) {
-						checkUser(txtName.getText());
-						user.setName(txtName.getText());
-					}
+//					if(txtName.getText()!=null) {
+//						checkUser(txtName.getText());
+//						user.setName(txtName.getText());
+//					}
+					Calendar c = Calendar.getInstance();
+					int year = c.get(Calendar.YEAR);
+					int yearOfBirth = txtbirthDate.getDate().getYear() + 1900;
+					int age = year - yearOfBirth;
 					
-					user.setPassword(txtPassword.getText());
-					user.setAddress(txtAddress.getText());
-					user.setDateOfBirth(txtbirthDate.getDate());
-
-					user.setUserName(txtUserName.getText());
-
-					list.add(user);
-
-					writeFileLogin();
+					 String queryInsert = "insert into users(username,name,password,address,age) values(?,?,?,?,?) ";
+						PreparedStatement pstInsert = conn.prepareStatement(queryInsert);
+						
+						pstInsert.setString(1,txtUserName.getText());
+						pstInsert.setString(2, txtName.getText());
+						pstInsert.setString(3,txtPassword.getText());
+						pstInsert.setString(4, txtAddress.getText());
+						pstInsert.setInt(5,age);
+						
+						
+					    int executeUpdate = pstInsert.executeUpdate();
+					
+//					user.setPassword(txtPassword.getText());
+//					user.setAddress(txtAddress.getText());
+//					user.setDateOfBirth(txtbirthDate.getDate());
+//
+//					user.setUserName(txtUserName.getText());
+//
+//					list.add(user);
+//
+//					writeFileLogin();
 					LoginScreen loginScreen = new LoginScreen();
 					loginScreen.setVisible(true);
 					setVisible(false);

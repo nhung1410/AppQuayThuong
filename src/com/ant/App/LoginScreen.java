@@ -15,8 +15,8 @@ import org.apache.commons.codec.binary.StringUtils;
 import org.apache.poi.util.StringUtil;
 import org.omg.CORBA.PUBLIC_MEMBER;
 
-
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
@@ -38,6 +38,7 @@ public class LoginScreen extends JFrame {
 	private JTextField txtPassword;
 	private JLabel lblUserWarning;
 	private JLabel lblPasswarning;
+	Connection conn = SqliteConnection.dbConnector();
 
 	/**
 	 * Launch the application.
@@ -56,69 +57,44 @@ public class LoginScreen extends JFrame {
 		});
 	}
 
+	private void login(String usn, String pass) {
+		try {
+			String query = "select * from users where username=? and password=?";
+			PreparedStatement pst = conn.prepareStatement(query);
+			pst.setString(1, usn);
+			pst.setString(2, pass);
+			ResultSet rs = pst.executeQuery();
+			boolean flag = false;
+			User us = new User();
+			while (rs.next()) {
+				us.setId(rs.getInt("id"));
+				us.setUserName(rs.getString("username"));
+				us.setName(rs.getString("name"));
+				us.setAddress(rs.getString("address"));
+				us.setPassword(rs.getString("password"));
+				flag = true;
+			}
+			if (flag) {
+//				DashbroadScreen ds = new DashbroadScreen(us);
+//				ds.setVisible(true);
+//				setVisible(false);
+			} else {
+				lblPasswarning.setText("Wrong username or password. Try again.");
+			}
+
+			rs.close();
+			pst.close();
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(null, e.getMessage());
+		}
+
+	}
+
 	/**
 	 * Create the frame.
 	 */
-	private void login() {
-		FileReader fr = null;
-		BufferedReader br = null;
-		String str = null;
-
-		try {
-
-			fr = new FileReader("Login.txt");
-			br = new BufferedReader(fr);
-
-			while ((str = br.readLine()) != null) {
-
-				String[] token = str.split(",");
-
-				if (token[1].equals(txtUserName.getText()) && token[2].equals(txtPassword.getText())) {
-					try {
-						User info = new User();
-						info.setId(Integer.parseInt(token[0]));
-						info.setUserName(token[1]);
-						info.setPassword(token[2]);
-						info.setName(token[3]);
-						info.setAge(Integer.parseInt(token[4]));
-
-						info.setAddress(token[5]);
-
-						ProfileScreen broadScreen = new ProfileScreen(info);
-						broadScreen.setVisible(true);
-
-						setVisible(false);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				} else if ((token[1].equals(txtUserName.getText())) && (!token[2].equals(txtPassword.getText()))) {
-					lblPasswarning.setText("Wrong password. Try again.");
-
-				}
-
-				else if ((!token[1].equals(txtUserName.getText())) && (token[2].equals(txtPassword.getText()))) {
-
-					lblUserWarning.setText("Wrong username. Try again.");
-
-				}
-
-			}
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				br.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	Connection conn;
-
 	public LoginScreen() {
-		conn = SqliteConnection.dbConnector();
+
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 400, 300);
 		LoginPanel = new JPanel();
@@ -163,23 +139,19 @@ public class LoginScreen extends JFrame {
 		btnLogin.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
-					if ((txtPassword.getText().length() > 0) && (txtUserName.getText().length() > 0)) {
-						if (txtUserName.getText().equals("superadmin") && txtPassword.getText().equals("password")) {
-							
-							ListEmployeeScreen adminScreen = new ListEmployeeScreen();
-							adminScreen.setVisible(true);
-							setVisible(false);
-						} else {
-							login();
-						}
+					if (!txtUserName.getText().isEmpty() && !txtPassword.getText().isEmpty()) {
+
+						login(txtUserName.getText(), txtPassword.getText());
+						
 
 					} else {
-						if (txtUserName.getText().equals(""))
+						if (txtUserName.getText().equals("")) {
 							lblUserWarning.setText("Enter Username");
-
-						else
+						} else {
 
 							lblPasswarning.setText("Enter Password");
+							lblUserWarning.setText("Wrong username. Try again.");
+						}
 					}
 
 				} catch (Exception e) {
@@ -199,7 +171,6 @@ public class LoginScreen extends JFrame {
 				RegisterScreen registerScreen = new RegisterScreen();
 				registerScreen.setVisible(true);
 				setVisible(false);
-			
 
 			}
 		});

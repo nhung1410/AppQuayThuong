@@ -49,23 +49,19 @@ public class ListEmployeeScreen extends JFrame {
 	public static void setData(Vector<Object> list3) {
 		list2 = list3;
 	}
+	private User user;
 
+	private User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
 	/**
 	 * Launch the application.
 	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					ListEmployeeScreen frame = new ListEmployeeScreen();
-					frame.setVisible(true);
-
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
+	
 
 	ArrayList<User> list = new ArrayList<User>();
 
@@ -175,7 +171,7 @@ public class ListEmployeeScreen extends JFrame {
 		contentPane.setLayout(null);
 
 		JMenuBar menuBar = new JMenuBar();
-		menuBar.setBounds(0, 0, 213, 26);
+		menuBar.setBounds(0, 0, 370, 26);
 		contentPane.add(menuBar);
 
 		JMenuItem mnEmployee = new JMenuItem("Employee ");
@@ -187,6 +183,9 @@ public class ListEmployeeScreen extends JFrame {
 
 		JMenuItem mnDb = new JMenuItem("Dashbroad");
 		menuBar.add(mnDb);
+		
+		JMenuItem mnProfile = new JMenuItem("Profile");
+		menuBar.add(mnProfile);
 
 		JTextField txtUrl = new JTextField();
 		txtUrl.setBounds(212, 38, 496, 36);
@@ -307,15 +306,15 @@ public class ListEmployeeScreen extends JFrame {
 		btnLogout.setBounds(884, 0, 98, 26);
 		contentPane.add(btnLogout);
 		
-		mnPrize.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				PrizeScreen prizeScreen = new PrizeScreen();
-				prizeScreen.setVisible(true);
-				setVisible(false);
-			}
-		});
+//		mnPrize.addActionListener(new ActionListener() {
+//
+//			@Override
+//			public void actionPerformed(ActionEvent e) {
+//				PrizeScreen prizeScreen = new PrizeScreen(_user);
+//				prizeScreen.setVisible(true);
+//				setVisible(false);
+//			}
+//		});
 		mnDb.addActionListener(new ActionListener() {
 
 			@Override
@@ -326,5 +325,15 @@ public class ListEmployeeScreen extends JFrame {
 				setVisible(false);
 			}
 		});
+//		mnProfile.addActionListener(new ActionListener() {
+//			
+//			@Override
+//			public void actionPerformed(ActionEvent e) {
+//				ProfileScreen profileScreen = new ProfileScreen(_user);
+//				profileScreen.setVisible(true);
+//				setVisible(false);
+//				
+//			}
+//		});
 	}
 }

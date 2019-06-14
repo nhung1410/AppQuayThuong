@@ -29,6 +29,8 @@ import java.awt.event.ActionEvent;
 import java.awt.Color;
 import java.sql.*;
 import java.sql.Connection;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 
 public class ProfileScreen extends JFrame {
 
@@ -46,22 +48,7 @@ public class ProfileScreen extends JFrame {
 	/**
 	 * Launch the application.
 	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					ProfileScreen frame = new ProfileScreen();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
 
-	public ProfileScreen() {
-
-	}
 
 	/**
 	 * Create the frame.
@@ -175,13 +162,9 @@ public class ProfileScreen extends JFrame {
 		profilePanel.add(lblRePassWarn);
 
 		StringBuilder helloLable = new StringBuilder();
-		JLabel lblHello = new JLabel("Welcome, ");
-		lblHello.setBounds(449, 0, 373, 26);
-		contentPane.add(lblHello);
 
 		if (getUser() != null) {
 			helloLable.append(getUser().getName());
-			lblHello.setText(helloLable.toString());
 			txtName.setText(getUser().getName());
 			txtAddress.setText(getUser().getAddress());
 			txtPassword.setText(getUser().getPassword());
@@ -279,7 +262,21 @@ public class ProfileScreen extends JFrame {
 		btnLogout.setFont(new Font("Dialog", Font.BOLD, 13));
 		btnLogout.setBounds(884, 0, 98, 26);
 		contentPane.add(btnLogout);
-		helloLable.append(lblHello.getText());
+		
+		JMenuBar menuBar = new JMenuBar();
+		menuBar.setBounds(0, 0, 493, 26);
+		contentPane.add(menuBar);
+		
+		JMenuItem mnEmployee = new JMenuItem("Employee");
+		menuBar.add(mnEmployee);
+		
+		JMenuItem mnPrize = new JMenuItem("Prize");
+		menuBar.add(mnPrize);
+		
+		JMenuItem mnDb = new JMenuItem("Dashbroad");
+		menuBar.add(mnDb);
+		
+		JMenuItem mnProfile = new JMenuItem("Profile");
+		menuBar.add(mnProfile);
 	}
-
 }
