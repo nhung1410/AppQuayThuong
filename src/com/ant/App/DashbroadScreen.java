@@ -132,16 +132,18 @@ public class DashbroadScreen extends JFrame {
 
 	}
 
-	private void showRewardData(ArrayList<Reward> reList) {
+	private ArrayList<Reward> showRewardData() {
+		ArrayList<Reward> reList = new ArrayList<Reward>();
 		Connection conn = null;
 		PreparedStatement pst = null;
 		ResultSet rs = null;
+
 		try {
 			conn = SqliteConnection.dbConnector();
 			pst = conn.prepareStatement("SELECT * from reward where  turn > t");
 			rs = pst.executeQuery();
 
-			while(rs.next()) {
+			while (rs.next()) {
 				int rewardId = rs.getInt(1);
 				String name = rs.getString(2);
 				int turn = rs.getInt(3);
@@ -155,7 +157,8 @@ public class DashbroadScreen extends JFrame {
 				reward.setPrize(prize);
 				reward.setT(t);
 				reList.add(reward);
-			} 
+//				System.out.println("hhh");
+			}
 
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(null, e.getMessage());
@@ -168,29 +171,49 @@ public class DashbroadScreen extends JFrame {
 				JOptionPane.showMessageDialog(null, e2.getMessage());
 			}
 		}
+		return reList;
 	}
 
 	private void updateRewardData() {
+
 		Connection conn = null;
 		PreparedStatement statement = null;
-		ArrayList<Reward> reList = new ArrayList<Reward>();
-		Reward re = new Reward();
 
 		try {
 			conn = SqliteConnection.dbConnector();
 			statement = conn.prepareStatement("update reward set t =?  where id = ?");
-			showRewardData(reList);
-			while(!reList.isEmpty()) {
 
-				statement.setInt(1, reList.get(0).getT() + 1);
-				statement.setInt(2, reList.get(0).getId());
-				statement.execute();
-				txtClazz.setText(reList.get(0).getClazz().toString());
-				txtTurn.setText(String.valueOf(reList.get(0).getTurns() - reList.get(0).getT() - 1));
-			} 
+			ArrayList<Reward> reList = showRewardData();
+			
+//			for (Reward re : reList) {
+			
+			if (reList.size() > 0) {
+				if (reList.size() == sizeBandau) {
+					statement.setInt(1, reList.get(0).getT() + 1);
+					statement.setInt(2, reList.get(0).getId());
+					statement.execute();
+					txtClazz.setText(reList.get(0).getClazz().toString());
+					txtTurn.setText(String.valueOf(reList.get(0).getTurns() - reList.get(0).getT() - 1));
+				}else if(reList.size() < sizeBandau) {
+					sizeBandau = reList.size();
+					txtClazz.setText(reList.get(0).getClazz().toString());
+					txtTurn.setText(String.valueOf(reList.get(0).getTurns() - reList.get(0).getT()));
+				}
+			}
+
+//			}
+
+//			if(!reList.isEmpty()) { 
+//				statement.setInt(1, reList.get(0).getT() + 1);
+//				statement.setInt(2, reList.get(0).getId());
+//				statement.execute();
+//				
+//				txtClazz.setText(reList.get(0).getClazz().toString());
+//				txtTurn.setText(String.valueOf(reList.get(0).getTurns() - reList.get(0).getT() - 1));
+//			} 
 
 		} catch (Exception e) {
-			// TODO: handle exception
+			JOptionPane.showMessageDialog(null, e.getMessage());
 		} finally {
 			try {
 
@@ -205,12 +228,13 @@ public class DashbroadScreen extends JFrame {
 
 	private JTable table;
 	private JTextField txtTurn;
-
+	public int sizeBandau=0;
 	/**
 	 * Create the frame.
 	 */
 	public DashbroadScreen() {
 //		setUser(_user);
+
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 1000, 700);
 		contentPane = new JPanel();
@@ -255,13 +279,13 @@ public class DashbroadScreen extends JFrame {
 		txtTurn.setBounds(244, 318, 136, 30);
 		panel.add(txtTurn);
 
-		ArrayList<Reward> reList = new ArrayList<Reward>();
-		showRewardData(reList);
-		while(!reList.isEmpty()) {
-		txtClazz.setText(reList.get(0).getClazz().toString());
-		txtTurn.setText(String.valueOf(reList.get(0).getTurns() - reList.get(0).getT()));
+		ArrayList<Reward> reList = showRewardData();
+		sizeBandau=reList.size();
+		if (reList.size() > 0) {
+			txtClazz.setText(reList.get(0).getClazz().toString());
+			txtTurn.setText(String.valueOf(reList.get(0).getTurns() - reList.get(0).getT()));
 		}
-		
+
 		txtM = new JTextField();
 		txtM.setHorizontalAlignment(SwingConstants.CENTER);
 		txtM.setText("M");

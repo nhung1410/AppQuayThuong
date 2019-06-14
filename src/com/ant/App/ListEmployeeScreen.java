@@ -236,7 +236,7 @@ public class ListEmployeeScreen extends JFrame {
 //							model.addColumn(cell.getStringCellValue());
 //
 //						}
-						User user = new User();
+//						User user = new User();
 						Vector <Object> list = new Vector<>();
 						for (Row row : sheet) {
 							int rowNum = row.getRowNum();

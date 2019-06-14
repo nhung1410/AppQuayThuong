@@ -11,14 +11,14 @@ public class SqliteConnection {
         Connection conn = null;
         try {
             // db parameters
-            String url = "jdbc:sqlite:C:\\\\Users\\\\admin\\\\Desktop\\\\App\\\\AppQuayThuong\\\\my_database.sqlite";
+            String url = "jdbc:sqlite:C:/Sqlite/my_database.sqlite";
             // create a connection to the database
             conn = DriverManager.getConnection(url);            
             conn = SqliteConnection.dbConnector();
-//            PreparedStatement pst = conn.prepareStatement("SELECT * FROM reward");
-//			ResultSet rs = pst.executeQuery();
-//			System.out.println(rs.getString("name"));
-//			System.out.println("OK");
+            PreparedStatement pst = conn.prepareStatement("SELECT * FROM reward");
+			ResultSet rs = pst.executeQuery();
+			System.out.println(rs.getString("name"));
+			System.out.println("OK");
 //            PreparedStatement statement = conn.prepareStatement("SELECT * from reward where turn = t");
 //			ResultSet res = statement.executeQuery();
 			 
@@ -41,7 +41,7 @@ public class SqliteConnection {
 	public static Connection dbConnector() {
 		try {
 			Class.forName("org.sqlite.JDBC");  
-             conn =  DriverManager.getConnection("jdbc:sqlite:C:\\Users\\admin\\Desktop\\App\\AppQuayThuong\\my_database.sqlite"); 
+             conn =  DriverManager.getConnection("jdbc:sqlite:C:/Sqlite/my_database.sqlite"); 
             
             return conn;
 		}catch (Exception e) {

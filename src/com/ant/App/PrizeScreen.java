@@ -456,14 +456,14 @@ public class PrizeScreen extends JFrame {
 			}
 		});
 
-//		mnDb.addActionListener(new ActionListener() {
+		mnDb.addActionListener(new ActionListener() {
 
-//			@Override
-//			public void actionPerformed(ActionEvent e) {
-//				DashbroadScreen dashbroadScreen = new DashbroadScreen(_user);
-//				dashbroadScreen.setVisible(true);
-//				setVisible(false);
-//			}
-//		});
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				DashbroadScreen dashbroadScreen = new DashbroadScreen();
+				dashbroadScreen.setVisible(true);
+				setVisible(false);
+			}
+		});
 	}
 }

@@ -75,9 +75,9 @@ public class LoginScreen extends JFrame {
 				flag = true;
 			}
 			if (flag) {
-//				DashbroadScreen ds = new DashbroadScreen(us);
-//				ds.setVisible(true);
-//				setVisible(false);
+				DashbroadScreen ds = new DashbroadScreen();
+				ds.setVisible(true);
+				setVisible(false);
 			} else {
 				lblPasswarning.setText("Wrong username or password. Try again.");
 			}
