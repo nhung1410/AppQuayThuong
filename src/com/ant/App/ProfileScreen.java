@@ -1,8 +1,5 @@
 package com.ant.App;
 
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
@@ -10,6 +7,8 @@ import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
 import com.toedter.calendar.JDateChooser;
+import com.ant.Util.CheckNull;
+import com.ant.Util.PasswordValidator;
 import com.ant.Util.SqliteConnection;
 import com.ant.entities.User;
 
@@ -20,15 +19,13 @@ import javax.swing.JMenu;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Scanner;
 import java.awt.event.ActionEvent;
 import java.awt.Color;
 import java.sql.*;
 import java.sql.Connection;
+import java.text.SimpleDateFormat;
+
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 
@@ -45,16 +42,14 @@ public class ProfileScreen extends JFrame {
 		this.user = user;
 	}
 
-	/**
-	 * Launch the application.
-	 */
-
+	
 
 	/**
 	 * Create the frame.
 	 */
 
 	Connection conn;
+
 	public ProfileScreen(User _user) {
 		conn = SqliteConnection.dbConnector();
 		setUser(_user);
@@ -67,7 +62,7 @@ public class ProfileScreen extends JFrame {
 		JMenu profiel = new JMenu();
 
 		JPanel profilePanel = new JPanel();
-		profilePanel.setBounds(159, 50, 647, 590);
+		profilePanel.setBounds(159, 97, 647, 517);
 		contentPane.add(profilePanel);
 
 		JLabel lblID = new JLabel("ID: ");
@@ -81,84 +76,87 @@ public class ProfileScreen extends JFrame {
 
 		JTextField txtName = new JTextField();
 		txtName.setFont(new Font("Dialog", Font.PLAIN, 14));
-		txtName.setBounds(238, 65, 322, 30);
+		txtName.setBounds(173, 66, 322, 30);
 		profilePanel.add(txtName);
 
 		JLabel lblNamewarn = new JLabel("");
 		lblNamewarn.setForeground(Color.RED);
 		lblNamewarn.setFont(new Font("Dialog", Font.ITALIC, 12));
-		lblNamewarn.setBounds(171, 91, 359, 30);
+		lblNamewarn.setBounds(173, 96, 462, 30);
 		profilePanel.add(lblNamewarn);
 
 		JLabel lblAddress = new JLabel("Address");
 		lblAddress.setFont(new Font("Dialog", Font.BOLD, 14));
-		lblAddress.setBounds(23, 140, 98, 30);
+		lblAddress.setBounds(23, 138, 98, 30);
 		profilePanel.add(lblAddress);
 
 		JTextField txtAddress = new JTextField();
 		txtAddress.setFont(new Font("Dialog", Font.PLAIN, 14));
 		txtAddress.setColumns(10);
-		txtAddress.setBounds(238, 140, 322, 30);
+		txtAddress.setBounds(173, 139, 341, 30);
 		profilePanel.add(txtAddress);
 
 		JLabel lblAddressWarn = new JLabel("");
 		lblAddressWarn.setForeground(Color.RED);
 		lblAddressWarn.setFont(new Font("Dialog", Font.ITALIC, 12));
-		lblAddressWarn.setBounds(161, 182, 369, 30);
+		lblAddressWarn.setBounds(173, 171, 434, 30);
 		profilePanel.add(lblAddressWarn);
 
 		JLabel lblBirthday = new JLabel("Date of birth");
 		lblBirthday.setFont(new Font("Dialog", Font.BOLD, 14));
-		lblBirthday.setBounds(23, 224, 106, 30);
+		lblBirthday.setBounds(23, 214, 106, 30);
 		profilePanel.add(lblBirthday);
 		JDateChooser txtbirthDate = new JDateChooser();
 
-		txtbirthDate.setBounds(238, 224, 237, 30);
+		txtbirthDate.setBounds(173, 214, 256, 30);
 		profilePanel.add(txtbirthDate);
 		txtbirthDate.setDateFormatString("dd/MM/yyyy");
 
 		JLabel lblBirthWarn = new JLabel("");
 		lblBirthWarn.setForeground(Color.RED);
 		lblBirthWarn.setFont(new Font("Dialog", Font.ITALIC, 12));
-		lblBirthWarn.setBounds(161, 284, 369, 30);
+		lblBirthWarn.setBounds(173, 244, 434, 30);
 		profilePanel.add(lblBirthWarn);
 
 		JLabel lblPassword = new JLabel("Your password");
 		lblPassword.setFont(new Font("Dialog", Font.BOLD, 14));
-		lblPassword.setBounds(23, 300, 162, 30);
+		lblPassword.setBounds(23, 288, 140, 30);
 		profilePanel.add(lblPassword);
 
 		JTextField txtPassword = new JPasswordField();
-		txtPassword.setBounds(238, 300, 322, 30);
+		txtPassword.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		txtPassword.setBounds(173, 289, 341, 30);
 		profilePanel.add(txtPassword);
 		txtPassword.setColumns(10);
 		txtPassword.setEditable(false);
 
 		JButton btnEp = new JButton("Edit");
-		btnEp.setBounds(575, 300, 55, 30);
+		btnEp.setFont(new Font("Tahoma", Font.BOLD, 14));
+		btnEp.setBounds(545, 288, 72, 30);
 		profilePanel.add(btnEp);
 
 		JLabel lblPassWarn = new JLabel("");
 		lblPassWarn.setForeground(Color.RED);
 		lblPassWarn.setFont(new Font("Dialog", Font.ITALIC, 12));
-		lblPassWarn.setBounds(238, 347, 322, 30);
+		lblPassWarn.setBounds(173, 319, 471, 30);
 		profilePanel.add(lblPassWarn);
 
 		JLabel lblRePassword = new JLabel("Confirm password");
 		lblRePassword.setFont(new Font("Dialog", Font.BOLD, 14));
-		lblRePassword.setBounds(23, 397, 174, 30);
+		lblRePassword.setBounds(23, 361, 140, 30);
 		profilePanel.add(lblRePassword);
 
 		JTextField txtRePassword = new JPasswordField();
+		txtRePassword.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		txtRePassword.setColumns(10);
-		txtRePassword.setBounds(238, 397, 322, 30);
+		txtRePassword.setBounds(173, 362, 341, 30);
 		profilePanel.add(txtRePassword);
 		txtRePassword.setEditable(false);
 
 		JLabel lblRePassWarn = new JLabel("");
 		lblRePassWarn.setForeground(Color.RED);
 		lblRePassWarn.setFont(new Font("Dialog", Font.ITALIC, 12));
-		lblRePassWarn.setBounds(238, 439, 322, 30);
+		lblRePassWarn.setBounds(173, 394, 462, 30);
 		profilePanel.add(lblRePassWarn);
 
 		StringBuilder helloLable = new StringBuilder();
@@ -184,56 +182,78 @@ public class ProfileScreen extends JFrame {
 
 		JButton btnSubmit = new JButton("Submit");
 		btnSubmit.setFont(new Font("Dialog", Font.BOLD, 14));
-		btnSubmit.setBounds(219, 495, 157, 44);
+		btnSubmit.setBounds(272, 445, 157, 44);
 		profilePanel.add(btnSubmit);
-
 		btnSubmit.addActionListener(new ActionListener() {
-
-			@SuppressWarnings("deprecation")
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				String name = txtName.getText();
-				String address = txtAddress.getText();
-				String pass = txtPassword.getText();
-
-				Calendar c = Calendar.getInstance();
-				int year = c.get(Calendar.YEAR);
-				int yearOfBirth = txtbirthDate.getDate().getYear() + 1900;
-				int age = year - yearOfBirth ;
-				File f = new File("Login.txt");
-				ArrayList<String> list = new ArrayList<String>();
-				String str = "";
+				Connection conn = null;
+				PreparedStatement pstUpdate = null;
+				SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 				try {
+					java.util.Date d = txtbirthDate.getDate();
 
-					Scanner r = new Scanner(f);
-					while ((str = r.nextLine()) != null) {
-						System.out.println("start");
-						String[] token = str.split(",");
-						if (getUser().getId() == Integer.parseInt(token[0])) {
+					String sd;
+					if (d == null) {
+						sd = "";
+					} else {
+						sd = sdf.format(d);
+					}
+					CheckNull text = new CheckNull();
+					conn = SqliteConnection.dbConnector();
+					pstUpdate = conn.prepareStatement(
+							"UPDATE users SET name = ?, address = ?, age = ?, password = ? WHERE id = ?");
+					if (text.checkText(txtName.getText(), lblNamewarn)
+							&& text.checkText(txtAddress.getText(), lblAddressWarn)
+							&& text.checkText(txtbirthDate.getDateFormatString(), lblBirthWarn)
+							&& text.checkText(txtPassword.getText(), lblPassWarn)
+							&& text.checkText(txtRePassword.getText(), lblRePassWarn)
+							&& text.checkText(sd, lblBirthWarn)) {
+						PasswordValidator passValidator = new PasswordValidator();
+						if (passValidator.validate(txtPassword.getText())
+								&& txtPassword.getText().equals(txtRePassword.getText())) {
 
-							System.out.println(str);
-
-							list.add(token[0] + "," + token[1] + "," + pass + "," + name + "," + age + "," + address);
+							Calendar c = Calendar.getInstance();
+							int year = c.get(Calendar.YEAR);
+							@SuppressWarnings("deprecation")
+							int yearOfBirth = txtbirthDate.getDate().getYear() + 1900;
+							int age = year - yearOfBirth;
+							pstUpdate.setString(1, txtName.getText());
+							pstUpdate.setString(2, txtAddress.getText());
+							pstUpdate.setInt(3, age);
+							pstUpdate.setString(4, txtPassword.getText());
+							pstUpdate.setInt(5, getUser().getId());
+							pstUpdate.execute();
+							JOptionPane.showMessageDialog(null, "Edit profile successfully!");
 
 							
-						} else {
-							list.add(str);
+							lblNamewarn.setText("");
+							lblAddressWarn.setText("");
+							lblBirthWarn.setText("");
+							lblPassWarn.setText("");
+							lblRePassWarn.setText("");
+							
+							txtPassword.setEditable(false);
+							txtRePassword.setEditable(false);
+							
+
+						} else if (!passValidator.validate(txtPassword.getText())) {
+							lblPassWarn.setText("You can use letters(a-z, A-Z, 0-9), 8-16 characters & periods");
+
+						} else if (!txtPassword.getText().equals(txtRePassword.getText())) {
+							lblRePassWarn.setText("Like password!");
 						}
-
 					}
 
-					r.close();
 				} catch (Exception e) {
-					// TODO: handle exception
 					JOptionPane.showMessageDialog(null, e.getMessage());
-				}
-				try (PrintWriter pw = new PrintWriter(f)) {
-					for (String s : list) {
-						pw.println(s);
+				} finally {
+					try {
+						pstUpdate.close();
+						conn.close();
+					} catch (Exception e2) {
+						JOptionPane.showMessageDialog(null, e2.getMessage());
 					}
-
-				} catch (Exception e) {
-					// TODO: handle exception
 				}
 
 			}
@@ -246,7 +266,7 @@ public class ProfileScreen extends JFrame {
 				try {
 
 					JDialog.setDefaultLookAndFeelDecorated(true);
-					int response = JOptionPane.showConfirmDialog(null, "Do you want to log out?", "Confirm",
+					int response = JOptionPane.showConfirmDialog(null, "Do you want to exit?", "Confirm",
 							JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 					if (response == JOptionPane.YES_OPTION) {
 						setVisible(false);
@@ -262,21 +282,50 @@ public class ProfileScreen extends JFrame {
 		btnLogout.setFont(new Font("Dialog", Font.BOLD, 13));
 		btnLogout.setBounds(884, 0, 98, 26);
 		contentPane.add(btnLogout);
-		
+
 		JMenuBar menuBar = new JMenuBar();
 		menuBar.setBounds(0, 0, 493, 26);
 		contentPane.add(menuBar);
-		
+
 		JMenuItem mnEmployee = new JMenuItem("Employee");
 		menuBar.add(mnEmployee);
-		
+
 		JMenuItem mnPrize = new JMenuItem("Prize");
 		menuBar.add(mnPrize);
-		
+
 		JMenuItem mnDb = new JMenuItem("Dashbroad");
 		menuBar.add(mnDb);
-		
+
 		JMenuItem mnProfile = new JMenuItem("Profile");
 		menuBar.add(mnProfile);
+
+		mnEmployee.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ListEmployeeScreen employeeScreen = new ListEmployeeScreen(_user);
+				employeeScreen.setVisible(true);
+				setVisible(false);
+			}
+		});
+		mnPrize.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				PrizeScreen prizeScreen = new PrizeScreen(_user);
+				prizeScreen.setVisible(true);
+				setVisible(false);
+
+			}
+		});
+		mnDb.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				DashbroadScreen dashbroadScreen = new DashbroadScreen(_user);
+				dashbroadScreen.setVisible(true);
+				setVisible(false);
+			}
+		});
 	}
 }

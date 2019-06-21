@@ -1,18 +1,14 @@
 package com.ant.App;
 
-import java.awt.EventQueue;
 import java.awt.Font;
 import java.util.*;
 import com.ant.entities.*;
-
-import com.ant.entities.User;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -41,154 +37,140 @@ import java.sql.Connection;
 public class ListEmployeeScreen extends JFrame {
 
 	private JPanel contentPane;
-	private static Vector<Object> list2;
-	public static Vector<Object> getData() {
-		return list2;
-	}
 
-	public static void setData(Vector<Object> list3) {
-		list2 = list3;
-	}
 	private User user;
-
-	private User getUser() {
-		return user;
-	}
 
 	public void setUser(User user) {
 		this.user = user;
 	}
-	/**
-	 * Launch the application.
-	 */
-	
 
-	ArrayList<User> list = new ArrayList<User>();
-
-	private void readDataEmployee() {
-		File file = new File("Login.txt");
-		
-			try {
-				if(file.exists() == true) {
-					List<String> lines = FileUtils.readLines(file, "UTF-8");
-					int i =0;
-					for (String data : lines) {
-					String token[] = data.split(",");
-					User user = new User();
-					user.setId(Integer.parseInt(token[0]));
-					user.setName(token[3]);
-					user.setAge(Integer.parseInt(token[4]));
-					user.setAddress(token[5]);
-
-					list.add(user);
-				
-				}
-	
-				}
-				else {
-					
-				}
-				
-				
-			}
-			catch (FileNotFoundException ex) {
-				ex.printStackTrace();
-			}
-			catch (Exception e) {
-				// TODO: handle exception
-				e.printStackTrace();
-			}
-		
-		
-	}
-
-	private void showEmployee(JTable table, JScrollPane scrollPane, DefaultTableModel model) {
-
+	private void addExcelPathData(String path) {
+		Connection conn = null;
+		PreparedStatement statement = null;
 		try {
-			int i = 0;
-			for (User u : list) {
-				i++;
-
-				Vector<Object> row = new Vector<Object>();
-				row.add(i);
-				row.add(u.getId());
-				row.add(u.getName());
-				row.add(u.getAge());
-				row.add(u.getAddress());
-
-				model.addRow(row);
-			}
-
-			table.setModel(model);
-
-			table.setVisible(true);
-			scrollPane.setViewportView(table);
-			scrollPane.updateUI();
-
+			conn = SqliteConnection.dbConnector();
+			statement = conn.prepareStatement("INSERT INTO excelPath (path) VALUES (?)");
+			statement.setString(1, path);
+			statement.executeUpdate();
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			try {
+				statement.close();
+				conn.close();
+			} catch (Exception e2) {
+				e2.printStackTrace();
+			}
 		}
-
 	}
-	private void addFileLogin(ArrayList<User> list) throws IOException {
 
-		File f = new File("Login.txt");
-		FileWriter fw = new FileWriter(f, true);
-		FileReader fr = new FileReader(f);
-		int i = 0;
+	private void updatePathData(String path) {
+		Connection conn = null;
+		PreparedStatement statement = null;
 		try {
-			BufferedWriter bw = new BufferedWriter(fw);
-			BufferedReader br = new BufferedReader(fr);
-			
-			while (br.readLine() != null) {
-				i++;
-			}
-			for (User user : list) {
-
-				bw.write(user.toString());
-			}
-			bw.newLine();
-			bw.flush();
-			bw.close();
+			conn = SqliteConnection.dbConnector();
+			statement = conn.prepareStatement("UPDATE excelPath SET path = ?");
+			statement.setString(1, path);
+			statement.execute();
 
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			JOptionPane.showMessageDialog(null, e.getMessage());
+		} finally {
+			try {
+				statement.close();
+				conn.close();
+			} catch (Exception e2) {
+				JOptionPane.showMessageDialog(null, e2.getMessage());
+			}
 		}
 	}
-	Connection conn = null;
-	
+
+	@SuppressWarnings("resource")
+	private void showExcelFile(JTable table, DefaultTableModel model, JTextField txtUrl) {
+		Connection conn = null;
+		PreparedStatement statement = null;
+		ResultSet res = null;
+		try {
+			conn = SqliteConnection.dbConnector();
+			statement = conn.prepareStatement("SELECT * FROM excelPath");
+
+			res = statement.executeQuery();
+			if (res.next()) {
+				String path = res.getString("path");
+				File file = new File(path);
+				FileInputStream fis = new FileInputStream(file);
+				XSSFWorkbook workbook = new XSSFWorkbook(fis);
+				Sheet sheet = workbook.getSheetAt(0);
+				txtUrl.setText(path);
+				for (Row row : sheet) {
+					int rowNum = row.getRowNum();
+					if (rowNum == 0) {
+
+					} else {
+						int i = 0;
+
+						Vector<Object> data = new Vector<>();
+						for (Cell cell : row) {
+							data.add(i, cell.getStringCellValue());
+							i++;
+
+						}
+						
+						model.addRow(data);
+
+					}
+				}
+
+			}
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(null, e.getMessage());
+		} finally {
+			try {
+				res.close();
+				statement.close();
+				conn.close();
+			} catch (Exception e2) {
+				JOptionPane.showMessageDialog(null, e2.getMessage());
+			}
+		}
+
+	}
 
 	/**
 	 * Create the frame.
 	 */
-	public ListEmployeeScreen() {
-		conn = SqliteConnection.dbConnector();
+	public ListEmployeeScreen(User _user) {
+		setUser(_user);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 800, 700);
+		setBounds(100, 100, 1000, 700);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 
 		JMenuBar menuBar = new JMenuBar();
-		menuBar.setBounds(0, 0, 370, 26);
+		menuBar.setBounds(0, 0, 370, 30);
 		contentPane.add(menuBar);
 
 		JMenuItem mnEmployee = new JMenuItem("Employee ");
+		mnEmployee.setFont(new Font("Segoe UI", Font.PLAIN, 15));
 		mnEmployee.setBackground(SystemColor.activeCaption);
 		menuBar.add(mnEmployee);
 
 		JMenuItem mnPrize = new JMenuItem("Prize");
+		mnPrize.setFont(new Font("Segoe UI", Font.PLAIN, 15));
 		menuBar.add(mnPrize);
 
 		JMenuItem mnDb = new JMenuItem("Dashbroad");
+		mnDb.setFont(new Font("Segoe UI", Font.PLAIN, 15));
 		menuBar.add(mnDb);
-		
+
 		JMenuItem mnProfile = new JMenuItem("Profile");
+		mnProfile.setFont(new Font("Segoe UI", Font.PLAIN, 15));
 		menuBar.add(mnProfile);
 
 		JTextField txtUrl = new JTextField();
-		txtUrl.setBounds(212, 38, 496, 36);
+		txtUrl.setBounds(268, 38, 496, 36);
 		contentPane.add(txtUrl);
 		txtUrl.setColumns(10);
 
@@ -198,89 +180,53 @@ public class ListEmployeeScreen extends JFrame {
 		model.addColumn("Name");
 		model.addColumn("Age");
 		model.addColumn("Address");
-		
-		readDataEmployee();
 
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(44, 108, 693, 507);
+		scrollPane.setBounds(72, 117, 838, 507);
 		contentPane.add(scrollPane);
-		JTable table = new JTable(){
+		JTable table = new JTable() {
 			public boolean isCellEditable(int row, int column) {
 				return false;
 			};
 		};
-		showEmployee(table, scrollPane, model);
 
-		JButton btnSelect = new JButton("Import");
-		btnSelect.setBounds(77, 38, 112, 35);
+		scrollPane.setViewportView(table);
+		table.setModel(model);
+		showExcelFile(table, model, txtUrl);
+
+		JButton btnSelect = new JButton("Import file");
+		btnSelect.setFont(new Font("Tahoma", Font.BOLD, 14));
+		btnSelect.setBounds(133, 38, 123, 35);
 		contentPane.add(btnSelect);
 		btnSelect.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				JFileChooser fs = new JFileChooser();
-				fs.setDialogTitle("Select file");
+				try {
 
-				fs.setFileFilter(new FileTypeFilter(".xls", "Excel file"));
-				fs.setFileFilter(new FileTypeFilter(".xlsx", "Excel file"));
-				int result = fs.showOpenDialog(null);
-				if (result == JFileChooser.APPROVE_OPTION) {
+					JFileChooser fs = new JFileChooser();
+					fs.setDialogTitle("Select file");
+					fs.setFileFilter(new FileTypeFilter(".xls", "Excel file"));
+					fs.setFileFilter(new FileTypeFilter(".xlsx", "Excel file"));
+					int result = fs.showOpenDialog(null);
+					if (result == JFileChooser.APPROVE_OPTION) {
 
-					String excelPath = fs.getSelectedFile().getAbsolutePath();
-
-					try {
-						FileInputStream fis = new FileInputStream(new File(excelPath));
-						txtUrl.setText(excelPath);
-						@SuppressWarnings("resource")
-						XSSFWorkbook workbook = new XSSFWorkbook(fis);
-						Sheet sheet = workbook.getSheetAt(0);
-//						for (Cell cell : sheet.getRow(0)) {
-//							model.addColumn(cell.getStringCellValue());
-//
-//						}
-//						User user = new User();
-						Vector <Object> list = new Vector<>();
-						for (Row row : sheet) {
-							int rowNum = row.getRowNum();
-							if (rowNum == 0) {
-
-							} else {
-								int i = 0;
-								
-								Vector<Object> data = new Vector<>();
-								for (Cell cell : row) {
-									data.add(i, cell.getStringCellValue());
-									i++;
-									
-									
-								}
-								
-								model.addRow(data);
-								
-								list.add(data);
-//								System.out.println(data.elementAt(1));
-								
-//								user.setId(Integer.parseInt(data.elementAt(1).toString()));
-//								System.out.println(data.elementAt(3));
-//								user.setName( data.elementAt(2).toString());
-//								user.setAge(Integer.parseInt(data.elementAt(3).toString()));
-//								user.setAddress(data.elementAt(4).toString());
-//								list.add(user);
-//								addFileLogin(list);
-								}
+						String excelPath = fs.getSelectedFile().getAbsolutePath();
+						if (txtUrl.getText().isEmpty()) {
+							addExcelPathData(excelPath);
 							
-							setData(list);
+						} else {
+							model.getDataVector().removeAllElements();
+							updatePathData(excelPath);
 						}
-						
-						
-						
-						table.setVisible(true);
-						scrollPane.setViewportView(table);
-						scrollPane.updateUI();
+						showExcelFile(table, model, txtUrl);
 
-					} catch (Exception ex) {
-						JOptionPane.showMessageDialog(null, ex.getMessage());
 					}
+
+				} catch (Exception ex) {
+					JOptionPane.showMessageDialog(null, ex.getMessage());
+
 				}
 			}
+
 		});
 
 		JButton btnLogout = new JButton("Log out");
@@ -302,38 +248,38 @@ public class ListEmployeeScreen extends JFrame {
 				}
 			}
 		});
-		btnLogout.setFont(new Font("Dialog", Font.BOLD, 13));
-		btnLogout.setBounds(884, 0, 98, 26);
+		btnLogout.setFont(new Font("Dialog", Font.BOLD, 14));
+		btnLogout.setBounds(884, 0, 98, 35);
 		contentPane.add(btnLogout);
-		
-//		mnPrize.addActionListener(new ActionListener() {
-//
-//			@Override
-//			public void actionPerformed(ActionEvent e) {
-//				PrizeScreen prizeScreen = new PrizeScreen(_user);
-//				prizeScreen.setVisible(true);
-//				setVisible(false);
-//			}
-//		});
+
+		mnPrize.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				PrizeScreen prizeScreen = new PrizeScreen(_user);
+				prizeScreen.setVisible(true);
+				setVisible(false);
+			}
+		});
 		mnDb.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				DashbroadScreen dashbroad = new DashbroadScreen();
+				DashbroadScreen dashbroad = new DashbroadScreen(_user);
 				dashbroad.setVisible(true);
 				setVisible(false);
 			}
 		});
-//		mnProfile.addActionListener(new ActionListener() {
-//			
-//			@Override
-//			public void actionPerformed(ActionEvent e) {
-//				ProfileScreen profileScreen = new ProfileScreen(_user);
-//				profileScreen.setVisible(true);
-//				setVisible(false);
-//				
-//			}
-//		});
+		mnProfile.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ProfileScreen profileScreen = new ProfileScreen(_user);
+				profileScreen.setVisible(true);
+				setVisible(false);
+
+			}
+		});
 	}
 }

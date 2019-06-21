@@ -1,34 +1,19 @@
 package com.ant.App;
 
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.Random;
-import java.util.TreeMap;
 import java.util.Vector;
-import java.util.stream.IntStream;
 
 import com.ant.App.ListEmployeeScreen;
 import com.ant.App.LoginScreen;
-import com.ant.App.PrizeScreen;
 import com.ant.Util.SqliteConnection;
-import com.ant.entities.DetailReward;
+import com.ant.Util.getExcelFileValue;
+import com.ant.entities.Employee;
 import com.ant.entities.Reward;
 import com.ant.entities.User;
 
@@ -39,24 +24,18 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import org.apache.commons.compress.utils.Lists;
-import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Appender;
-import org.apache.xmlbeans.XmlCursor.TokenType;
-
 import java.awt.SystemColor;
 import javax.swing.JTextField;
-import javax.naming.spi.DirStateFactory.Result;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 
 import java.awt.Font;
-import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import java.awt.Color;
+import javax.swing.table.DefaultTableModel;
 
 public class DashbroadScreen extends JFrame {
 
@@ -68,9 +47,8 @@ public class DashbroadScreen extends JFrame {
 	private JTextField txt2;
 	private JTextField txt3;
 	private JTextField txt4;
-	String _turn;
 	private JTextField txtClazz;
-
+	private boolean flag = true;
 	private User user;
 
 	private User getUser() {
@@ -84,52 +62,182 @@ public class DashbroadScreen extends JFrame {
 	/**
 	 * Launch the application.
 	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					DashbroadScreen frame = new DashbroadScreen();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
+
+	private Vector<Employee> selectEmployeeList() {
+		Connection conn = null;
+		PreparedStatement pstSelect = null;
+		ResultSet res = null;
+		getExcelFileValue reader = new getExcelFileValue();
+		Vector<Employee> listEmp = reader.getData();
+		try {
+
+			conn = SqliteConnection.dbConnector();
+			pstSelect = conn.prepareStatement("SELECT * FROM rewardDetail");
+			res = pstSelect.executeQuery();
+			while (res.next()) {
+				for (int i = 0; i < listEmp.size(); i++) {
+
+					if (listEmp.get(i).getMaNV().equals(res.getString("maNV"))) {
+						listEmp.remove(i);
+
+					}
 				}
+
 			}
-		});
+		} catch (
+
+		Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				res.close();
+				pstSelect.close();
+				conn.close();
+			} catch (Exception e2) {
+				e2.printStackTrace();
+			}
+		}
+		return listEmp;
 	}
 
 	private void ActionStartBtn() {
 
-		Vector<Object> listEmp = new Vector<>();
-		listEmp = ListEmployeeScreen.getData();
-
+		Connection conn = null;
+		PreparedStatement statement = null;
+		Vector<Employee> listEmp = selectEmployeeList();
+		ArrayList<Reward> reList = showRewardData();
 		try {
-
+			conn = SqliteConnection.dbConnector();
+			statement = conn.prepareStatement("insert into rewardDetail (reward_id,maNV,nameNV) values (?,?,?) ");
 			Random ran = new Random();
-			if (listEmp != null) {
-
+			if ((listEmp.size() > 0) && (reList.size() > 0)) {
 				int num = ran.nextInt(listEmp.size());
 
-				String[] arr = listEmp.get(num).toString().split(",");
+				Employee employee = new Employee();
+				employee.setMaNV(listEmp.get(num).getMaNV());
+				employee.setName(listEmp.get(num).getName());
 
-				String t1 = String.valueOf(Integer.parseInt(arr[1].trim()) / 1000);
-				String t2 = String.valueOf((Integer.parseInt(arr[1].trim()) / 100) % 10);
-				String t3 = String.valueOf((Integer.parseInt(arr[1].trim()) % 100) / 10);
-				String t4 = String.valueOf(Integer.parseInt(arr[1].trim()) % 10);
+				String t1 = String.valueOf(Integer.parseInt(employee.getMaNV()) / 1000);
+				String t2 = String.valueOf((Integer.parseInt(employee.getMaNV()) / 100) % 10);
+				String t3 = String.valueOf((Integer.parseInt(employee.getMaNV()) % 100) / 10);
+				String t4 = String.valueOf(Integer.parseInt(employee.getMaNV()) % 10);
 				txt1.setText(t1);
 				txt2.setText(t2);
 				txt3.setText(t3);
 				txt4.setText(t4);
-				updateRewardData();
 
-			} else {
-				JOptionPane.showMessageDialog(null, "Chọn thêm nhân viên để quay thưởng !");
+				if (reList.size() == sizeBandau) {
+
+					statement.setInt(1, reList.get(0).getId());
+					statement.setString(2, employee.getMaNV());
+					statement.setString(3, employee.getName());
+					statement.executeUpdate();
+
+				} else {
+
+				}
+			} else if (listEmp.isEmpty() || reList.isEmpty()) {
+				JOptionPane.showMessageDialog(null, "Lượt quay kết thúc!");
 			}
 
 		} catch (Exception e) {
-			// TODO: handle exception
-			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, e.getMessage());
+
+		} finally {
+			try {
+
+				statement.close();
+				conn.close();
+
+			} catch (Exception e2) {
+				e2.printStackTrace();
+			}
 		}
 
+	}
+
+	private void insertTable(JTable table, DefaultTableModel model) {
+		Connection conn = null;
+		PreparedStatement statement = null;
+		ResultSet res = null;
+		ArrayList<Reward> reList = showRewardData();
+		Vector<Employee> listEmp = selectEmployeeList();
+		try {
+			conn = SqliteConnection.dbConnector();
+			statement = conn.prepareStatement(
+					"SELECT * FROM rewardDetail INNER JOIN reward ON rewardDetail.reward_id = reward.id ORDER BY id DESC LIMIT 1");
+			res = statement.executeQuery();
+			Vector<Object> row = new Vector<Object>();
+			if ((listEmp.size() >= 0) && (reList.size() > 0)) {
+				while (res.next()) {
+
+					if (reList.size() == sizeBandau) {
+						String name = res.getString("name");
+						String maNV = res.getString("maNV");
+						String nameNV = res.getString("nameNV");
+
+						row.add(table.getRowCount() + 1);
+						row.add(name);
+						row.add(maNV);
+						row.add(nameNV);
+						model.addRow(row);
+						table.setModel(model);
+					}
+
+				}
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				res.close();
+				statement.close();
+				conn.close();
+			} catch (Exception e2) {
+				e2.printStackTrace();
+			}
+		}
+	}
+
+	private void showTable(JTable table, DefaultTableModel model) {
+		Connection conn = null;
+		PreparedStatement statement = null;
+		ResultSet res = null;
+		try {
+			conn = SqliteConnection.dbConnector();
+			statement = conn.prepareStatement(
+					"SELECT * FROM rewardDetail INNER JOIN reward ON rewardDetail.reward_id = reward.id");
+			res = statement.executeQuery();
+			int stt = table.getRowCount();
+
+			while (res.next()) {
+				stt++;
+				String maNV = res.getString(3);
+				String nameNV = res.getString(4);
+
+				String name = res.getString(6);
+
+				Vector<Object> row = new Vector<Object>();
+				row.add(stt);
+				row.add(name);
+				row.add(maNV);
+				row.add(nameNV);
+				model.addRow(row);
+				table.setModel(model);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				res.close();
+				statement.close();
+				conn.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	private ArrayList<Reward> showRewardData() {
@@ -157,7 +265,6 @@ public class DashbroadScreen extends JFrame {
 				reward.setPrize(prize);
 				reward.setT(t);
 				reList.add(reward);
-//				System.out.println("hhh");
 			}
 
 		} catch (Exception e) {
@@ -178,63 +285,62 @@ public class DashbroadScreen extends JFrame {
 
 		Connection conn = null;
 		PreparedStatement statement = null;
+		
 
 		try {
 			conn = SqliteConnection.dbConnector();
 			statement = conn.prepareStatement("update reward set t =?  where id = ?");
 
 			ArrayList<Reward> reList = showRewardData();
-			
-//			for (Reward re : reList) {
-			
-			if (reList.size() > 0) {
-				if (reList.size() == sizeBandau) {
-					statement.setInt(1, reList.get(0).getT() + 1);
-					statement.setInt(2, reList.get(0).getId());
-					statement.execute();
-					txtClazz.setText(reList.get(0).getClazz().toString());
-					txtTurn.setText(String.valueOf(reList.get(0).getTurns() - reList.get(0).getT() - 1));
-				}else if(reList.size() < sizeBandau) {
-					sizeBandau = reList.size();
-					txtClazz.setText(reList.get(0).getClazz().toString());
-					txtTurn.setText(String.valueOf(reList.get(0).getTurns() - reList.get(0).getT()));
+			Vector<Employee> listEmp = selectEmployeeList();
+			System.out.println("listEmp "+listEmp.size());
+			System.out.println("reList "+reList.size());
+			System.out.println("flag "+flag);
+			if(flag) {
+				if (reList.size() > 0 && listEmp.size() >=0) {
+					if (listEmp.size() ==0 || listEmp.isEmpty()) {
+						System.out.println("flag false");
+						flag = false;
+					}
+					
+					if (reList.size() == sizeBandau) {
+						statement.setInt(1, reList.get(0).getT() + 1);
+						statement.setInt(2, reList.get(0).getId());
+						statement.execute();
+						txtClazz.setText(reList.get(0).getClazz().toString());
+						txtTurn.setText(String.valueOf(reList.get(0).getTurns() - reList.get(0).getT() - 1));
+						System.out.println("1");
+	
+					} else if (reList.size() < sizeBandau) {
+						sizeBandau = reList.size();
+						txtClazz.setText(reList.get(0).getClazz().toString());
+						txtTurn.setText(String.valueOf(reList.get(0).getTurns() - reList.get(0).getT()));
+						System.out.println("2");
+					}
 				}
 			}
 
-//			}
-
-//			if(!reList.isEmpty()) { 
-//				statement.setInt(1, reList.get(0).getT() + 1);
-//				statement.setInt(2, reList.get(0).getId());
-//				statement.execute();
-//				
-//				txtClazz.setText(reList.get(0).getClazz().toString());
-//				txtTurn.setText(String.valueOf(reList.get(0).getTurns() - reList.get(0).getT() - 1));
-//			} 
-
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(null, e.getMessage());
+			e.printStackTrace();
 		} finally {
 			try {
 
-//				pst.close();
 				statement.close();
 				conn.close();
 			} catch (Exception e2) {
-				JOptionPane.showMessageDialog(null, e2.getMessage());
+				e2.printStackTrace();
 			}
 		}
 	}
 
-	private JTable table;
 	private JTextField txtTurn;
-	public int sizeBandau=0;
+	public int sizeBandau = 0;
+
 	/**
 	 * Create the frame.
 	 */
-	public DashbroadScreen() {
-//		setUser(_user);
-
+	public DashbroadScreen(User _user) {
+		setUser(_user);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 1000, 700);
 		contentPane = new JPanel();
@@ -280,7 +386,8 @@ public class DashbroadScreen extends JFrame {
 		panel.add(txtTurn);
 
 		ArrayList<Reward> reList = showRewardData();
-		sizeBandau=reList.size();
+		sizeBandau = reList.size();
+
 		if (reList.size() > 0) {
 			txtClazz.setText(reList.get(0).getClazz().toString());
 			txtTurn.setText(String.valueOf(reList.get(0).getTurns() - reList.get(0).getT()));
@@ -344,15 +451,37 @@ public class DashbroadScreen extends JFrame {
 		txt4.setColumns(10);
 		txt4.setBounds(436, 115, 50, 60);
 		panel.add(txt4);
+
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBounds(547, 40, 399, 515);
+		panel.add(scrollPane);
+		JTable table = new JTable() {
+			public boolean isCellEditable(int row, int column) {
+				return false;
+			};
+		};
+		DefaultTableModel model = new DefaultTableModel();
+		model.addColumn("STT");
+		model.addColumn("Giải");
+		model.addColumn("Mã nhân viên");
+		model.addColumn("Tên nhân viên");
+
+		table.setModel(model);
+		showTable(table, model);
+		scrollPane.setViewportView(table);
+
 		JButton btnStart = new JButton("Start");
 		btnStart.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				try {
 
+				try {
 					ActionStartBtn();
+					insertTable(table, model);
+					updateRewardData();
 
 				} catch (Exception e) {
 					e.printStackTrace();
+
 				}
 			}
 		});
@@ -370,20 +499,13 @@ public class DashbroadScreen extends JFrame {
 		lblSLnQuay.setBounds(92, 316, 130, 29);
 		panel.add(lblSLnQuay);
 
-		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(584, 40, 362, 515);
-		panel.add(scrollPane);
-
-		table = new JTable();
-		scrollPane.setViewportView(table);
-
 		JButton btnLogout = new JButton("Log out");
 		btnLogout.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
 
 					JDialog.setDefaultLookAndFeelDecorated(true);
-					int response = JOptionPane.showConfirmDialog(null, "Do you want to log out?", "Confirm",
+					int response = JOptionPane.showConfirmDialog(null, "Do you want to exit?", "Confirm",
 							JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 					if (response == JOptionPane.YES_OPTION) {
 						setVisible(false);
@@ -396,37 +518,37 @@ public class DashbroadScreen extends JFrame {
 				}
 			}
 		});
-		btnLogout.setFont(new Font("Dialog", Font.BOLD, 13));
-		btnLogout.setBounds(884, 0, 98, 26);
+		btnLogout.setFont(new Font("Dialog", Font.BOLD, 14));
+		btnLogout.setBounds(884, 0, 98, 35);
 		contentPane.add(btnLogout);
 		mnEmployee.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				ListEmployeeScreen employeeScreen = new ListEmployeeScreen();
+				ListEmployeeScreen employeeScreen = new ListEmployeeScreen(_user);
 				employeeScreen.setVisible(true);
 				setVisible(false);
 			}
 		});
-//		mnPrize.addActionListener(new ActionListener() {
-//
-//			@Override
-//			public void actionPerformed(ActionEvent e) {
-//				PrizeScreen prizeScreen = new PrizeScreen(_user);
-//				prizeScreen.setVisible(true);
-//				setVisible(false);
-//
-//			}
-//		});
-//		mnProfile.addActionListener(new ActionListener() {
-//
-//			@Override
-//			public void actionPerformed(ActionEvent e) {
-//				ProfileScreen profileScreen = new ProfileScreen(_user);
-//				profileScreen.setVisible(true);
-//				setVisible(false);
-//
-//			}
-//		});
+		mnPrize.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				PrizeScreen prizeScreen = new PrizeScreen(_user);
+				prizeScreen.setVisible(true);
+				setVisible(false);
+
+			}
+		});
+		mnProfile.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ProfileScreen profileScreen = new ProfileScreen(_user);
+				profileScreen.setVisible(true);
+				setVisible(false);
+
+			}
+		});
 	}
 }

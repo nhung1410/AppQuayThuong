@@ -1,6 +1,5 @@
 package com.ant.App;
 
-import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.SystemColor;
@@ -8,25 +7,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Vector;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JEditorPane;
@@ -42,27 +25,20 @@ import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
-
-import org.apache.commons.io.FileUtils;
-
-
 import com.ant.Util.ButtonRender;
+import com.ant.Util.CheckNull;
 import com.ant.Util.SqliteConnection;
-import com.ant.entities.Reward;
+import com.ant.Util.TurnsValidator;
 import com.ant.entities.User;
 
-
 import java.sql.*;
+import java.awt.Color;
 
 public class PrizeScreen extends JFrame {
 
 	private JPanel contentPane;
 	private JTable table;
-	private JTextField txtTurns;
-	private JComboBox cbbClass;
-	private JEditorPane edtPrize;
 	private User user;
-	private Action action;
 
 	private User getUser() {
 		return user;
@@ -71,64 +47,77 @@ public class PrizeScreen extends JFrame {
 	public void setUser(User user) {
 		this.user = user;
 	}
+
 	/**
 	 * Launch the application.
 	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					PrizeScreen frame = new PrizeScreen();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
+//	public static void main(String[] args) {
+//		EventQueue.invokeLater(new Runnable() {
+//			public void run() {
+//				try {
+//					PrizeScreen frame = new PrizeScreen();
+//					frame.setVisible(true);
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		});
+//	}
 
-	private void Add() {
+	private void Add(JTextField txtTurns, JLabel lblTurnsWarn, JEditorPane edtPrize, JLabel lblPrizeWarn,
+			JComboBox cbbClass) {
+		Connection conn = null;
 
+		PreparedStatement pstInsert = null;
 		try {
-			Connection conn = SqliteConnection.dbConnector();
+			CheckNull checkNull = new CheckNull();
+			conn = SqliteConnection.dbConnector();
 			String queryInsert = "insert into reward(name,turn,prize,t) values(?,?,?,?) ";
-			PreparedStatement pstInsert = conn.prepareStatement(queryInsert);
-			pstInsert.setString(1, cbbClass.getSelectedItem().toString());
-			pstInsert.setInt(2, Integer.parseInt(txtTurns.getText()));
-			pstInsert.setString(3, edtPrize.getText());
-			pstInsert.setInt(4, 0);
-			int executeUpdate = pstInsert.executeUpdate();
-			pstInsert.close();
-			conn.close();
+			pstInsert = conn.prepareStatement(queryInsert);
+			if (checkNull.checkText(txtTurns.getText(), lblTurnsWarn)
+					&& checkNull.checkText(edtPrize.getText(), lblPrizeWarn)) {
+
+				pstInsert.setString(1, cbbClass.getSelectedItem().toString());
+				pstInsert.setInt(2, Integer.parseInt(txtTurns.getText()));
+				pstInsert.setString(3, edtPrize.getText());
+				pstInsert.setInt(4, 0);
+				pstInsert.executeUpdate();
+			}
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(null, e.getMessage());
+		} finally {
+			try {
+				pstInsert.close();
+				conn.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 
 	}
-	
+
 	private void updateDataReward(int id, String name, int turn, String prize) {
 		Connection conn = null;
 		PreparedStatement statement = null;
-		ResultSet res = null;
 		try {
+			
 			conn = SqliteConnection.dbConnector();
-			Connection connector = SqliteConnection.dbConnector();
 			statement = conn.prepareStatement("update reward set name = ? , turn = ?, prize =? where id = ?");
 			statement.setString(1, name);
 			statement.setInt(2, turn);
 			statement.setString(3, prize);
 			statement.setInt(4, id);
-			statement.execute();
+
+			statement.executeUpdate();
 		} catch (Exception e) {
-			// TODO: handle exception
-		}
-		finally {
+			e.printStackTrace();
+		} finally {
 			try {
-				res.close();
+
 				statement.close();
 				conn.close();
 			} catch (Exception e2) {
-				// TODO: handle exception
+				e2.printStackTrace();
 			}
 		}
 	}
@@ -141,14 +130,13 @@ public class PrizeScreen extends JFrame {
 			conn = SqliteConnection.dbConnector();
 			statement = conn.prepareStatement("SELECT * from reward");
 			res = statement.executeQuery();
-			
 			while (res.next()) {
-				
-				String id = res.getString(1);
-				String name = res.getString(2);
-				String turn = res.getString(3);
-				String prize = res.getString(4);
-				String t = res.getString(5);
+
+				String id = res.getString("id");
+				String name = res.getString("name");
+				String turn = res.getString("turn");
+				String prize = res.getString("prize");
+				String t = res.getString("t");
 				Vector<Object> row = new Vector<Object>();
 				row.add(id);
 				row.add(name);
@@ -163,7 +151,7 @@ public class PrizeScreen extends JFrame {
 			}
 
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(null, e.getMessage());
+			e.printStackTrace();
 		} finally {
 			try {
 				res.close();
@@ -179,11 +167,10 @@ public class PrizeScreen extends JFrame {
 	 * Create the frame.
 	 * 
 	 */
-	public PrizeScreen() {
-
-//		ArrayList<Reward> readFileReward = readFileReward();
+	public PrizeScreen(User _user) {
+		setUser(_user);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 800, 700);
+		setBounds(100, 100, 1000, 700);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -207,7 +194,7 @@ public class PrizeScreen extends JFrame {
 		menuBar.add(mnProfile);
 
 		JScrollPane scrollPane = new JScrollPane(table);
-		scrollPane.setBounds(48, 72, 694, 267);
+		scrollPane.setBounds(48, 72, 884, 267);
 		contentPane.add(scrollPane);
 
 		table = new JTable() {
@@ -219,53 +206,63 @@ public class PrizeScreen extends JFrame {
 		scrollPane.setViewportView(table);
 
 		DefaultTableModel model = new DefaultTableModel();
-		model.addColumn("ID");
-		model.addColumn("Class");
-		model.addColumn("Turns");
-		model.addColumn("Prize");
-		model.addColumn("Turn number");
+		model.addColumn("Mã giải thưởng");
+		model.addColumn("Giải");
+		model.addColumn("Lượt quay");
+		model.addColumn("Phần thưởng");
+		model.addColumn("Lượt quay còn lại");
 		model.addColumn("Action");
 		table.setModel(model);
 
 		JPanel editPanel = new JPanel();
-		editPanel.setBounds(48, 367, 694, 250);
+		editPanel.setBounds(48, 367, 884, 250);
 		contentPane.add(editPanel);
 		editPanel.setLayout(null);
 
 		JLabel lblNewLabel = new JLabel("Class");
-		lblNewLabel.setFont(new Font("Dialog", Font.BOLD, 13));
-		lblNewLabel.setBounds(12, 12, 55, 30);
+		lblNewLabel.setFont(new Font("Dialog", Font.BOLD, 14));
+		lblNewLabel.setBounds(159, 14, 55, 30);
 		editPanel.add(lblNewLabel);
 
 		JLabel lblTurns = new JLabel("Turns");
-		lblTurns.setFont(new Font("Dialog", Font.BOLD, 13));
-		lblTurns.setBounds(12, 53, 55, 30);
+		lblTurns.setFont(new Font("Dialog", Font.BOLD, 14));
+		lblTurns.setBounds(159, 57, 55, 30);
 		editPanel.add(lblTurns);
 
 		JLabel lblPrize = new JLabel("Prize");
-		lblPrize.setFont(new Font("Dialog", Font.BOLD, 13));
-		lblPrize.setBounds(12, 107, 55, 30);
+		lblPrize.setFont(new Font("Dialog", Font.BOLD, 14));
+		lblPrize.setBounds(159, 119, 55, 30);
 		editPanel.add(lblPrize);
 
-		String[] item = { "Giải ba", "Giải nhì","Giải nhất"  };
+		String[] item = { "Giải ba", "Giải nhì", "Giải nhất" };
 
-		cbbClass = new JComboBox(item);
-		cbbClass.setBounds(85, 15, 190, 30);
+		JComboBox cbbClass = new JComboBox(item);
+		cbbClass.setFont(new Font("Tahoma", Font.BOLD, 14));
+		cbbClass.setBounds(253, 15, 190, 30);
 		editPanel.add(cbbClass);
 
-		txtTurns = new JTextField();
-		txtTurns.setBounds(85, 58, 190, 30);
+		JTextField txtTurns = new JTextField();
+		txtTurns.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		txtTurns.setBounds(253, 58, 190, 30);
 		editPanel.add(txtTurns);
 		txtTurns.setColumns(10);
 
-		JPanel panel = new JPanel();
-		panel.setBounds(85, 119, 293, 119);
-		editPanel.add(panel);
-		panel.setLayout(null);
+		JLabel lblTurnsWarn = new JLabel("");
+		lblTurnsWarn.setForeground(Color.RED);
+		lblTurnsWarn.setFont(new Font("Tahoma", Font.BOLD | Font.ITALIC, 13));
+		lblTurnsWarn.setBounds(253, 90, 355, 25);
+		editPanel.add(lblTurnsWarn);
+		
+		JEditorPane edtPrize = new JEditorPane();
+		edtPrize.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		edtPrize.setBounds(253, 118, 293, 119);
+		editPanel.add(edtPrize);
 
-		edtPrize = new JEditorPane();
-		edtPrize.setBounds(0, 0, 293, 119);
-		panel.add(edtPrize);
+		JLabel lblPrizeWarn = new JLabel("");
+		lblPrizeWarn.setFont(new Font("Tahoma", Font.BOLD | Font.ITALIC, 13));
+		lblPrizeWarn.setForeground(Color.RED);
+		lblPrizeWarn.setBounds(558, 196, 304, 25);
+		editPanel.add(lblPrizeWarn);
 
 		table.addMouseListener(new MouseAdapter() {
 			@Override
@@ -275,12 +272,12 @@ public class PrizeScreen extends JFrame {
 				int selectedColumn = table.getSelectedColumn();
 				int columnCount = model.getColumnCount();
 				for (int column = 0; column < columnCount; column++) {
-					if ("Class".equals(table.getColumnName(column))) {
+					if ("Giải".equals(table.getColumnName(column))) {
 						cbbClass.setSelectedItem(table.getValueAt(selectedRow, column).toString());
 
-					} else if ("Turns".equals(table.getColumnName(column))) {
+					} else if ("Lượt quay".equals(table.getColumnName(column))) {
 						txtTurns.setText(table.getValueAt(selectedRow, column).toString());
-					} else if ("Prize".equals(table.getColumnName(column))) {
+					} else if ("Phần thưởng".equals(table.getColumnName(column))) {
 						edtPrize.setText(table.getValueAt(selectedRow, column).toString());
 
 					} else {
@@ -288,66 +285,62 @@ public class PrizeScreen extends JFrame {
 					}
 
 				}
-//				table.getValueAt(selectedRow, 1);
 
 			}
 		});
 
-//		showFileInTable(readFileReward, model);
 		showDataInTable(model);
 
 		JButton btnAdd = new JButton("Add");
+		btnAdd.setFont(new Font("Tahoma", Font.BOLD, 14));
 		btnAdd.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				Add();
+
 				Connection conn = null;
 				PreparedStatement statement = null;
 				ResultSet res = null;
 				try {
-					
+					Add(txtTurns, lblTurnsWarn, edtPrize, lblPrizeWarn, cbbClass);
 					conn = SqliteConnection.dbConnector();
 					statement = conn.prepareStatement("SELECT * from reward where id = (select max(id) from reward)");
 					res = statement.executeQuery();
-				
-					String id = res.getString(1);
-					String name = res.getString(2);
-					String turn = res.getString(3);
-					String prize = res.getString(4);
-					String t = res.getString(5);
-						Vector<Object> row = new Vector<Object>();
-						row.add(id);
-						row.add(name);
-						row.add(turn);
-						row.add(prize);
-						row.add(t);
+					CheckNull checkNull = new CheckNull();
+					if (checkNull.checkText(txtTurns.getText(), lblTurnsWarn)
+							&& checkNull.checkText(edtPrize.getText(), lblPrizeWarn)) {
 
-						ButtonRender buttonRender = new ButtonRender();
-						table.getColumn("Action").setCellRenderer(buttonRender);
+						while (res.next()) {
+							TurnsValidator validator = new TurnsValidator();
+							if (validator.Validate(txtTurns.getText())) {
+								String id = res.getString("id");
+								String name = res.getString("name");
+								String turn = res.getString("turn");
+								String prize = res.getString("prize");
+								String t = res.getString("t");
+								Vector<Object> row = new Vector<Object>();
+								row.add(id);
+								row.add(name);
+								row.add(turn);
+								row.add(prize);
+								row.add(t);
 
-						model.addRow(row);
-//
-					
-//
-//					Vector row = new Vector();
-//					row.add(reward.getId());
-//					row.add(reward.getClazz());
-//					row.add(reward.getTurns());
-//					row.add(reward.getPrize());
-//					row.add(reward.getT());
-//					row.add("Delete");
-//					table.getColumn("Action").setCellRenderer(new ButtonRender());
-//
-//					model.addRow(row);
+								ButtonRender buttonRender = new ButtonRender();
+								table.getColumn("Action").setCellRenderer(buttonRender);
 
-					
-					table.setModel(model);
-					table.setVisible(true);
-					contentPane.updateUI();
-					txtTurns.setText("");
-					edtPrize.setText("");
+								model.addRow(row);
+								table.setModel(model);
+								table.setVisible(true);
+								contentPane.updateUI();
+								txtTurns.setText("");
+								edtPrize.setText("");
+							} else {
+								lblTurnsWarn.setText("Enter number");
+							}
+						}
+					}
+
 				} catch (Exception e) {
 					e.printStackTrace();
-				}finally {
+				} finally {
 					try {
 						res.close();
 						statement.close();
@@ -359,65 +352,49 @@ public class PrizeScreen extends JFrame {
 			}
 		});
 
-		btnAdd.setBounds(513, 19, 98, 30);
+		btnAdd.setBounds(650, 57, 98, 30);
 		editPanel.add(btnAdd);
 
 		JButton btnUpdate = new JButton("Update");
+		btnUpdate.setFont(new Font("Tahoma", Font.BOLD, 14));
 		btnUpdate.addActionListener(new ActionListener() {
+
 			public void actionPerformed(ActionEvent arg0) {
+				try {
+					CheckNull checkNull = new CheckNull();
+					if (checkNull.checkText(txtTurns.getText(), lblTurnsWarn)
+							&& checkNull.checkText(edtPrize.getText(), lblPrizeWarn)) {
+						TurnsValidator validator = new TurnsValidator();
+						if (validator.Validate(txtTurns.getText())) {
+							String id = "";
+							int selectedRow = table.getSelectedRow();
+							int columnCount = model.getColumnCount();
+							for (int column = 0; column < columnCount; column++) {
+								if ("Giải".equals(table.getColumnName(column))) {
+									table.setValueAt(cbbClass.getSelectedItem(), selectedRow, column);
 
-				String id = "";
-				int selectedRow = table.getSelectedRow();
-				int columnCount = model.getColumnCount();
-				for (int column = 0; column < columnCount; column++) {
-					if ("Class".equals(table.getColumnName(column))) {
-						table.setValueAt(cbbClass.getSelectedItem(), selectedRow, column);
+								} else if ("Lượt quay".equals(table.getColumnName(column))) {
+									table.setValueAt(txtTurns.getText(), selectedRow, column);
+								} else if ("Phần thưởng".equals(table.getColumnName(column))) {
+									table.setValueAt(edtPrize.getText(), selectedRow, column);
+								} else if ("Mã giải thưởng".equals(table.getColumnName(column))) {
+									id = table.getValueAt(selectedRow, column).toString();
+								} else {
 
-					} else if ("Turns".equals(table.getColumnName(column))) {
-						table.setValueAt(txtTurns.getText(), selectedRow, column);
-					} else if ("Prize".equals(table.getColumnName(column))) {
-						table.setValueAt(edtPrize.getText(), selectedRow, column);
-					} else if ("ID".equals(table.getColumnName(column))) {
-						id = table.getValueAt(selectedRow, column).toString();
-					} else {
-
+								}
+							}
+							int _id = Integer.parseInt(id);
+							int _turn = Integer.parseInt(txtTurns.getText());
+							updateDataReward(_id, cbbClass.getSelectedItem().toString(), _turn, edtPrize.getText());
+						} else {
+							lblTurnsWarn.setText("Enter number");
+						}
 					}
 				}
-//			 Object selectedItem = cbbClass.getSelectedItem();
-				updateDataReward(Integer.parseInt(id),cbbClass.getSelectedItem().toString() , Integer.parseInt(txtTurns.getText()),edtPrize.getText());
-				
-//				File f = new File("Reward.txt");
-//				ArrayList<String> list = new ArrayList<String>();
 
-//				try {
-////					Scanner r = new Scanner(f);
-//
-//					List<String> lines = FileUtils.readLines(f, "UTF-8");
-//
-//					for (String st : lines) {
-//						String[] token = st.split(",");
-//
-//						if (token[0].equals(id)) {
-//							list.add(token[0] + "," + cbbClass.getSelectedItem() + "," + txtTurns.getText() + ","
-//									+ edtPrize.getText());
-//						} else {
-//							list.add(st);
-//						}
-//					}
-//
-//				} catch (Exception e) {
-//					// TODO: handle exception
-//					e.printStackTrace();
-//				}
-//				try (PrintWriter pw = new PrintWriter(f)) {
-//					for (String s : list) {
-//						pw.println(s);
-//					}
-//
-//				} catch (Exception e) {
-//					// TODO: handle exception
-//				}
-
+				catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		});
 
@@ -440,16 +417,18 @@ public class PrizeScreen extends JFrame {
 				}
 			}
 		});
-		btnLogout.setFont(new Font("Dialog", Font.BOLD, 13));
-		btnLogout.setBounds(884, 0, 98, 26);
+		btnLogout.setFont(new Font("Dialog", Font.BOLD, 14));
+		btnLogout.setBounds(884, 0, 98, 35);
 		contentPane.add(btnLogout);
-		btnUpdate.setBounds(513, 89, 98, 30);
+		btnUpdate.setBounds(650, 141, 98, 30);
 		editPanel.add(btnUpdate);
+
+		
 		mnEmployee.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				ListEmployeeScreen employeeScreen = new ListEmployeeScreen();
+				ListEmployeeScreen employeeScreen = new ListEmployeeScreen(_user);
 				employeeScreen.setVisible(true);
 
 				setVisible(false);
@@ -460,9 +439,19 @@ public class PrizeScreen extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				DashbroadScreen dashbroadScreen = new DashbroadScreen();
+				DashbroadScreen dashbroadScreen = new DashbroadScreen(_user);
 				dashbroadScreen.setVisible(true);
 				setVisible(false);
+			}
+		});
+		mnProfile.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ProfileScreen profileScreen = new ProfileScreen(_user);
+				profileScreen.setVisible(true);
+				setVisible(false);
+
 			}
 		});
 	}

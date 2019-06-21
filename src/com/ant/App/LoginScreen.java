@@ -9,25 +9,17 @@ import javax.swing.JPasswordField;
 import javax.swing.border.EmptyBorder;
 
 import com.ant.Util.SqliteConnection;
-import com.ant.entities.*;
-
-import org.apache.commons.codec.binary.StringUtils;
-import org.apache.poi.util.StringUtil;
-import org.omg.CORBA.PUBLIC_MEMBER;
 
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.awt.event.ActionEvent;
+
 import com.ant.entities.User;
 import java.sql.*;
 import java.sql.Connection;
-
 import java.awt.Color;
 import java.awt.Font;
 
@@ -38,7 +30,6 @@ public class LoginScreen extends JFrame {
 	private JTextField txtPassword;
 	private JLabel lblUserWarning;
 	private JLabel lblPasswarning;
-	Connection conn = SqliteConnection.dbConnector();
 
 	/**
 	 * Launch the application.
@@ -58,12 +49,17 @@ public class LoginScreen extends JFrame {
 	}
 
 	private void login(String usn, String pass) {
+		Connection conn = null;
+		PreparedStatement pst = null;
+		ResultSet rs = null;
 		try {
+			
+			conn = SqliteConnection.dbConnector();
 			String query = "select * from users where username=? and password=?";
-			PreparedStatement pst = conn.prepareStatement(query);
+			pst = conn.prepareStatement(query);
 			pst.setString(1, usn);
 			pst.setString(2, pass);
-			ResultSet rs = pst.executeQuery();
+			rs = pst.executeQuery();
 			boolean flag = false;
 			User us = new User();
 			while (rs.next()) {
@@ -75,17 +71,25 @@ public class LoginScreen extends JFrame {
 				flag = true;
 			}
 			if (flag) {
-				DashbroadScreen ds = new DashbroadScreen();
+				DashbroadScreen ds = new DashbroadScreen(us);
 				ds.setVisible(true);
 				setVisible(false);
 			} else {
 				lblPasswarning.setText("Wrong username or password. Try again.");
 			}
 
-			rs.close();
-			pst.close();
+			
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(null, e.getMessage());
+		}
+		finally {
+			try {
+				rs.close();
+				pst.close();
+				conn.close();
+			} catch (Exception e2) {
+				e2.printStackTrace();
+			}
 		}
 
 	}
@@ -96,42 +100,44 @@ public class LoginScreen extends JFrame {
 	public LoginScreen() {
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 400, 300);
+		setBounds(100, 100, 522, 396);
 		LoginPanel = new JPanel();
 		LoginPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(LoginPanel);
 		LoginPanel.setLayout(null);
 
-		JLabel lblLogin = new JLabel("Name:");
+		JLabel lblLogin = new JLabel("Username");
 		lblLogin.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblLogin.setBounds(48, 63, 55, 16);
+		lblLogin.setBounds(50, 66, 75, 30);
 		LoginPanel.add(lblLogin);
 
-		JLabel lblPassword = new JLabel("Password:");
+		JLabel lblPassword = new JLabel("Password");
 		lblPassword.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblPassword.setBounds(48, 110, 75, 16);
+		lblPassword.setBounds(48, 123, 75, 30);
 		LoginPanel.add(lblPassword);
 
 		txtUserName = new JTextField();
-		txtUserName.setBounds(135, 60, 211, 22);
+		txtUserName.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		txtUserName.setBounds(137, 60, 253, 30);
 		LoginPanel.add(txtUserName);
 		txtUserName.setColumns(10);
 
 		lblUserWarning = new JLabel("");
-		lblUserWarning.setFont(new Font("Dialog", Font.ITALIC, 12));
+		lblUserWarning.setFont(new Font("Dialog", Font.BOLD | Font.ITALIC, 13));
 		lblUserWarning.setForeground(Color.RED);
-		lblUserWarning.setBounds(135, 81, 211, 16);
+		lblUserWarning.setBounds(137, 91, 253, 25);
 		LoginPanel.add(lblUserWarning);
 
 		txtPassword = new JPasswordField();
-		txtPassword.setBounds(135, 107, 211, 22);
+		txtPassword.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		txtPassword.setBounds(137, 124, 253, 30);
 		LoginPanel.add(txtPassword);
 		txtPassword.setColumns(10);
 
 		lblPasswarning = new JLabel("");
 		lblPasswarning.setFont(new Font("Dialog", Font.ITALIC, 12));
 		lblPasswarning.setForeground(Color.RED);
-		lblPasswarning.setBounds(135, 130, 211, 16);
+		lblPasswarning.setBounds(137, 155, 253, 25);
 		LoginPanel.add(lblPasswarning);
 
 		JButton btnLogin = new JButton("Login");
@@ -142,7 +148,6 @@ public class LoginScreen extends JFrame {
 					if (!txtUserName.getText().isEmpty() && !txtPassword.getText().isEmpty()) {
 
 						login(txtUserName.getText(), txtPassword.getText());
-						
 
 					} else {
 						if (txtUserName.getText().equals("")) {
@@ -155,13 +160,13 @@ public class LoginScreen extends JFrame {
 					}
 
 				} catch (Exception e) {
-					// TODO: handle exception
+					e.printStackTrace();
 				}
 
 			}
 		});
 
-		btnLogin.setBounds(77, 158, 75, 25);
+		btnLogin.setBounds(137, 204, 75, 35);
 		LoginPanel.add(btnLogin);
 
 		JButton btnRegiser = new JButton("Register");
@@ -174,7 +179,7 @@ public class LoginScreen extends JFrame {
 
 			}
 		});
-		btnRegiser.setBounds(209, 158, 117, 25);
+		btnRegiser.setBounds(291, 204, 117, 35);
 		LoginPanel.add(btnRegiser);
 
 	}
