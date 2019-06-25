@@ -35,6 +35,7 @@ import java.io.*;
 import java.awt.SystemColor;
 import java.sql.*;
 import java.sql.Connection;
+import java.text.DecimalFormat;
 
 public class ListEmployeeScreen extends JFrame {
 
@@ -123,7 +124,13 @@ public class ListEmployeeScreen extends JFrame {
 
 						for (Cell cell : row) {
 
-							data.add(i, cell.getStringCellValue());
+							if (cell.getCellType() == CellType.STRING) {
+								data.add(i, cell.getStringCellValue());
+							} else if (cell.getCellType() == CellType.NUMERIC) {
+								DecimalFormat decimalFormat = new DecimalFormat("#");
+								data.add(i,decimalFormat.format(cell.getNumericCellValue()) );
+							}
+
 							i++;
 						}
 
@@ -134,10 +141,11 @@ public class ListEmployeeScreen extends JFrame {
 
 			}
 
-		}catch (Exception e) {
+		} catch (Exception e) {
+
 			JOptionPane.showMessageDialog(null, "Chọn file có dữ liệu dạng text");
-		}
-		finally {
+
+		} finally {
 			try {
 				res.close();
 				statement.close();

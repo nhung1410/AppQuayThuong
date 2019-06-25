@@ -62,12 +62,12 @@ public class RegisterScreen extends JFrame {
 			res = statement.executeQuery();
 			while (res.next()) {
 				if (username.isEmpty()) {
-					lbl.setText("Enter blank");
+					lbl.setText("Enter Username");
 					check = false;
 
 				} else {
 					if (username.equals(res.getString("username"))) {
-						lbl.setText("username already exist!");
+						lbl.setText("Username already exist!");
 						check = false;
 						System.out.println();
 					} else {
@@ -155,7 +155,7 @@ public class RegisterScreen extends JFrame {
 			public void keyPressed(KeyEvent e) {
 				// TODO Auto-generated method stub
 				if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-					lblUserNamewarn.setText("You can use letters(a-z, A_Z), 4-12 characters & periods");
+					lblUserNamewarn.setText("Username includes letters(a-z, A_Z, 0-9) & 4-12 characters periods");
 					txtUserName.setText("");
 				}
 			}
@@ -216,7 +216,7 @@ public class RegisterScreen extends JFrame {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-					lblPassWarn.setText("You can use letters(a-z, A-Z, 0-9), 8-16 characters & periods");
+					lblPassWarn.setText("Password includes 8-16 characters & periods");
 					txtPassword.setText("");
 				}
 			}
@@ -309,11 +309,11 @@ public class RegisterScreen extends JFrame {
 							"insert into users(username,name,password,address,age) values(?,?,?,?,?)");
 
 					if (checkUserName(txtUserName.getText(), lblUserNamewarn)
-							&& checkNull.checkText(txtPassword.getText(), lblPassWarn)
-							&& checkNull.checkText(txtName.getText(), lblNamewarn)
-							&& checkNull.checkText(txtRePassword.getText(), lblRePassWarn)
-							&& checkNull.checkText(txtAddress.getText(), lblAddressWarn)
-							&& checkNull.checkText(sd, lblBirthWarn)) {
+							&& checkNull.checkText(txtName.getText(), lblNamewarn, lblName.getText())
+							&& checkNull.checkText(txtPassword.getText(), lblPassWarn, lblPassword.getText())
+							&& checkNull.checkText(txtRePassword.getText(), lblRePassWarn, lblRePassword.getText())
+							&& checkNull.checkText(txtAddress.getText(), lblAddressWarn, lblAddress.getText())
+							&& checkNull.checkText(sd, lblBirthWarn, lblBirthday.getText())) {
 
 						UsernameValidator validator = new UsernameValidator();
 						PasswordValidator passValidator = new PasswordValidator();
@@ -336,9 +336,9 @@ public class RegisterScreen extends JFrame {
 							setVisible(false);
 
 						} else if (!validator.Validate(txtUserName.getText())) {
-							lblUserNamewarn.setText("You can use letters(a-z, A_Z), 4-12 characters & periods");
+							lblUserNamewarn.setText("Username includes letters(a-z, A_Z, 0-9) & 4-12 characters periods");
 						} else if (!passValidator.validate(txtPassword.getText())) {
-							lblPassWarn.setText("You can use letters(a-z, A-Z, 0-9), 8-16 characters & periods");
+							lblPassWarn.setText("Password includes 8-16 characters & periods");
 						} else if (!txtPassword.getText().equals(txtRePassword.getText())) {
 							lblRePassWarn.setText("Like password!");
 						}

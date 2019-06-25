@@ -1,6 +1,5 @@
 package com.ant.Util;
 
-import static org.junit.Assert.*;
 
 import java.util.Vector;
 

@@ -48,7 +48,7 @@ public class DashbroadScreen extends JFrame {
 	private JTextField txt3;
 	private JTextField txt4;
 	private JTextField txtClazz;
-	private boolean flag = true;
+	private boolean flag ;
 	private User user;
 
 	private User getUser() {
@@ -69,7 +69,7 @@ public class DashbroadScreen extends JFrame {
 		ResultSet res = null;
 		getExcelFileValue reader = new getExcelFileValue();
 		Vector<Employee> listEmp = reader.getData();
-		
+
 		try {
 
 			conn = SqliteConnection.dbConnector();
@@ -107,13 +107,14 @@ public class DashbroadScreen extends JFrame {
 		PreparedStatement statement = null;
 		Vector<Employee> listEmp = selectEmployeeList();
 		ArrayList<Reward> reList = showRewardData();
-		
+
 		try {
-			
+
 			conn = SqliteConnection.dbConnector();
 			statement = conn.prepareStatement("insert into rewardDetail (reward_id,maNV,nameNV) values (?,?,?) ");
 			Random ran = new Random();
 			if ((listEmp.size() > 0) && (reList.size() > 0)) {
+				flag = true;
 				int num = ran.nextInt(listEmp.size());
 
 				Employee employee = new Employee();
@@ -175,19 +176,20 @@ public class DashbroadScreen extends JFrame {
 			if (reList.size() > 0 && listEmp.size() >= 0) {
 
 				while (res.next()) {
-					System.out.println(flag);
-					if (reList.size() == sizeBandau) {
-						String name = res.getString("name");
-						String maNV = res.getString("maNV");
-						String nameNV = res.getString("nameNV");
+					if (flag) {
+						if (reList.size() == sizeBandau) {
+							String name = res.getString("name");
+							String maNV = res.getString("maNV");
+							String nameNV = res.getString("nameNV");
 
-						row.add(table.getRowCount() + 1);
-						row.add(name);
-						row.add(maNV);
-						row.add(nameNV);
-						model.addRow(row);
-						table.setModel(model);
+							row.add(table.getRowCount() + 1);
+							row.add(name);
+							row.add(maNV);
+							row.add(nameNV);
+							model.addRow(row);
+							table.setModel(model);
 
+						}
 					}
 				}
 			}
@@ -316,7 +318,7 @@ public class DashbroadScreen extends JFrame {
 						sizeBandau = reList.size();
 						txtClazz.setText(reList.get(0).getClazz().toString());
 						txtTurn.setText(String.valueOf(reList.get(0).getTurns() - reList.get(0).getT()));
-						
+
 					}
 				}
 			}

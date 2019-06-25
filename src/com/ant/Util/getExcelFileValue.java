@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.util.Vector;
 
 import javax.swing.JOptionPane;
@@ -16,6 +17,7 @@ import javax.swing.table.DefaultTableModel;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -49,7 +51,13 @@ public class getExcelFileValue {
 						Vector<Object> data = new Vector<>();
 						Employee employee = new Employee();
 						for (Cell cell : row) {
-							data.add(i, cell.getStringCellValue());
+							if (cell.getCellType() == CellType.STRING) {
+								data.add(i, cell.getStringCellValue());
+							} else if (cell.getCellType() == CellType.NUMERIC) {
+								DecimalFormat decimalFormat = new DecimalFormat("#");
+								data.add(i,decimalFormat.format(cell.getNumericCellValue()) );
+							}
+
 							i++;
 
 						}

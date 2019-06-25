@@ -159,7 +159,7 @@ public class ProfileScreen extends JFrame {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-					lblPassWarn.setText("You can use letters(a-z, A-Z, 0-9), 8-16 characters & periods");
+					lblPassWarn.setText("Password includes 8-16 characters & periods");
 					txtPassword.setText("");
 				}
 				
@@ -228,12 +228,11 @@ public class ProfileScreen extends JFrame {
 					conn = SqliteConnection.dbConnector();
 					pstUpdate = conn.prepareStatement(
 							"UPDATE users SET name = ?, address = ?, age = ?, password = ? WHERE id = ?");
-					if (text.checkText(txtName.getText(), lblNamewarn)
-							&& text.checkText(txtAddress.getText(), lblAddressWarn)
-							&& text.checkText(txtbirthDate.getDateFormatString(), lblBirthWarn)
-							&& text.checkText(txtPassword.getText(), lblPassWarn)
-							&& text.checkText(txtRePassword.getText(), lblRePassWarn)
-							&& text.checkText(sd, lblBirthWarn)) {
+					if (text.checkText(txtName.getText(), lblNamewarn, lblName.getText())
+							&& text.checkText(txtAddress.getText(), lblAddressWarn, lblAddress.getText())
+							&& text.checkText(txtPassword.getText(), lblPassWarn, lblPassword.getText())
+							&& text.checkText(txtRePassword.getText(), lblRePassWarn,lblRePassword.getText())
+							&& text.checkText(sd, lblBirthWarn,lblBirthday.getText())) {
 						PasswordValidator passValidator = new PasswordValidator();
 						if (passValidator.validate(txtPassword.getText())
 								&& txtPassword.getText().equals(txtRePassword.getText())) {
@@ -263,10 +262,10 @@ public class ProfileScreen extends JFrame {
 							
 
 						} else if (!passValidator.validate(txtPassword.getText())) {
-							lblPassWarn.setText("You can use letters(a-z, A-Z, 0-9), 8-16 characters & periods");
+							lblPassWarn.setText("Password includes 8-16 characters & periods");
 
 						} else if (!txtPassword.getText().equals(txtRePassword.getText())) {
-							lblRePassWarn.setText("Like password!");
+							lblRePassWarn.setText("Like password");
 						}
 					}
 

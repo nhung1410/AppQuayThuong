@@ -73,8 +73,8 @@ public class PrizeScreen extends JFrame {
 			conn = SqliteConnection.dbConnector();
 			String queryInsert = "insert into reward(name,turn,prize,t) values(?,?,?,?) ";
 			pstInsert = conn.prepareStatement(queryInsert);
-			if (checkNull.checkText(txtTurns.getText(), lblTurnsWarn)
-					&& checkNull.checkText(edtPrize.getText(), lblPrizeWarn)) {
+			if (checkNull.checkText(txtTurns.getText(), lblTurnsWarn, "turns")
+					&& checkNull.checkText(edtPrize.getText(), lblPrizeWarn, "prize")) {
 				TurnsValidator validator = new TurnsValidator();
 				if (validator.Validate(txtTurns.getText())) {
 
@@ -310,8 +310,8 @@ public class PrizeScreen extends JFrame {
 					statement = conn.prepareStatement("SELECT * from reward where id = (select max(id) from reward)");
 					res = statement.executeQuery();
 					CheckNull checkNull = new CheckNull();
-					if (checkNull.checkText(txtTurns.getText(), lblTurnsWarn)
-							&& checkNull.checkText(edtPrize.getText(), lblPrizeWarn)) {
+					if (checkNull.checkText(txtTurns.getText(), lblTurnsWarn, "turn")
+							&& checkNull.checkText(edtPrize.getText(), lblPrizeWarn, "prize")) {
 
 						while (res.next()) {
 							TurnsValidator validator = new TurnsValidator();
@@ -367,8 +367,8 @@ public class PrizeScreen extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
 					CheckNull checkNull = new CheckNull();
-					if (checkNull.checkText(txtTurns.getText(), lblTurnsWarn)
-							&& checkNull.checkText(edtPrize.getText(), lblPrizeWarn)) {
+					if (checkNull.checkText(txtTurns.getText(), lblTurnsWarn, "turn")
+							&& checkNull.checkText(edtPrize.getText(), lblPrizeWarn, "prize")) {
 						TurnsValidator validator = new TurnsValidator();
 						if (validator.Validate(txtTurns.getText())) {
 							String id = "";
