@@ -69,6 +69,7 @@ public class DashbroadScreen extends JFrame {
 		ResultSet res = null;
 		getExcelFileValue reader = new getExcelFileValue();
 		Vector<Employee> listEmp = reader.getData();
+		
 		try {
 
 			conn = SqliteConnection.dbConnector();
@@ -106,7 +107,9 @@ public class DashbroadScreen extends JFrame {
 		PreparedStatement statement = null;
 		Vector<Employee> listEmp = selectEmployeeList();
 		ArrayList<Reward> reList = showRewardData();
+		
 		try {
+			
 			conn = SqliteConnection.dbConnector();
 			statement = conn.prepareStatement("insert into rewardDetail (reward_id,maNV,nameNV) values (?,?,?) ");
 			Random ran = new Random();
@@ -168,9 +171,11 @@ public class DashbroadScreen extends JFrame {
 					"SELECT * FROM rewardDetail INNER JOIN reward ON rewardDetail.reward_id = reward.id ORDER BY id DESC LIMIT 1");
 			res = statement.executeQuery();
 			Vector<Object> row = new Vector<Object>();
-			if ((listEmp.size() >= 0) && (reList.size() > 0)) {
-				while (res.next()) {
 
+			if (reList.size() > 0 && listEmp.size() >= 0) {
+
+				while (res.next()) {
+					System.out.println(flag);
 					if (reList.size() == sizeBandau) {
 						String name = res.getString("name");
 						String maNV = res.getString("maNV");
@@ -182,8 +187,8 @@ public class DashbroadScreen extends JFrame {
 						row.add(nameNV);
 						model.addRow(row);
 						table.setModel(model);
-					}
 
+					}
 				}
 			}
 
@@ -285,7 +290,6 @@ public class DashbroadScreen extends JFrame {
 
 		Connection conn = null;
 		PreparedStatement statement = null;
-		
 
 		try {
 			conn = SqliteConnection.dbConnector();
@@ -293,29 +297,26 @@ public class DashbroadScreen extends JFrame {
 
 			ArrayList<Reward> reList = showRewardData();
 			Vector<Employee> listEmp = selectEmployeeList();
-			System.out.println("listEmp "+listEmp.size());
-			System.out.println("reList "+reList.size());
-			System.out.println("flag "+flag);
-			if(flag) {
-				if (reList.size() > 0 && listEmp.size() >=0) {
-					if (listEmp.size() ==0 || listEmp.isEmpty()) {
-						System.out.println("flag false");
+
+			if (flag) {
+				if (reList.size() > 0 && listEmp.size() >= 0) {
+					if (reList.size() == 0 || listEmp.size() == 0) {
+
 						flag = false;
 					}
-					
+
 					if (reList.size() == sizeBandau) {
 						statement.setInt(1, reList.get(0).getT() + 1);
 						statement.setInt(2, reList.get(0).getId());
 						statement.execute();
 						txtClazz.setText(reList.get(0).getClazz().toString());
 						txtTurn.setText(String.valueOf(reList.get(0).getTurns() - reList.get(0).getT() - 1));
-						System.out.println("1");
-	
+
 					} else if (reList.size() < sizeBandau) {
 						sizeBandau = reList.size();
 						txtClazz.setText(reList.get(0).getClazz().toString());
 						txtTurn.setText(String.valueOf(reList.get(0).getTurns() - reList.get(0).getT()));
-						System.out.println("2");
+						
 					}
 				}
 			}

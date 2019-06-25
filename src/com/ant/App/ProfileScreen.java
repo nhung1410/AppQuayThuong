@@ -19,6 +19,8 @@ import javax.swing.JMenu;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.Calendar;
 import java.awt.event.ActionEvent;
 import java.awt.Color;
@@ -140,6 +142,29 @@ public class ProfileScreen extends JFrame {
 		lblPassWarn.setFont(new Font("Dialog", Font.ITALIC, 12));
 		lblPassWarn.setBounds(173, 319, 471, 30);
 		profilePanel.add(lblPassWarn);
+		txtPassword.addKeyListener(new KeyListener() {
+			
+			@Override
+			public void keyTyped(KeyEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void keyReleased(KeyEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+					lblPassWarn.setText("You can use letters(a-z, A-Z, 0-9), 8-16 characters & periods");
+					txtPassword.setText("");
+				}
+				
+			}
+		});
 
 		JLabel lblRePassword = new JLabel("Confirm password");
 		lblRePassword.setFont(new Font("Dialog", Font.BOLD, 14));

@@ -22,6 +22,7 @@ import java.awt.Font;
 import javax.swing.JTextField;
 
 import com.toedter.calendar.JDateChooser;
+import com.toedter.calendar.JTextFieldDateEditor;
 
 import javax.swing.JButton;
 
@@ -50,8 +51,8 @@ public class RegisterScreen extends JFrame {
 		});
 	}
 
-	private String checkUserName(String username, JLabel lbl) {
-		String str = null;
+	private Boolean checkUserName(String username, JLabel lbl) {
+		Boolean check = true;
 		Connection conn = null;
 		PreparedStatement statement = null;
 		ResultSet res = null;
@@ -59,16 +60,24 @@ public class RegisterScreen extends JFrame {
 			conn = SqliteConnection.dbConnector();
 			statement = conn.prepareStatement("SELECT * FROM users");
 			res = statement.executeQuery();
-			if (res.next()) {
-				if (username.equals(res.getString("username"))) {
-					lbl.setText("username already exist!");
-					str = "";
+			while (res.next()) {
+				if (username.isEmpty()) {
+					lbl.setText("Enter blank");
+					check = false;
+
 				} else {
-					str = username;
+					if (username.equals(res.getString("username"))) {
+						lbl.setText("username already exist!");
+						check = false;
+						System.out.println();
+					} else {
+						check = true;
+					}
 				}
 			}
+		} catch (
 
-		} catch (Exception e) {
+		Exception e) {
 			e.printStackTrace();
 		}
 
@@ -81,7 +90,7 @@ public class RegisterScreen extends JFrame {
 				e.printStackTrace();
 			}
 		}
-		return str;
+		return check;
 	}
 
 	/**
@@ -146,7 +155,8 @@ public class RegisterScreen extends JFrame {
 			public void keyPressed(KeyEvent e) {
 				// TODO Auto-generated method stub
 				if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-					lblUserNamewarn.setText("You can use letters(a-z, A_Z) & periods");
+					lblUserNamewarn.setText("You can use letters(a-z, A_Z), 4-12 characters & periods");
+					txtUserName.setText("");
 				}
 			}
 		});
@@ -207,6 +217,7 @@ public class RegisterScreen extends JFrame {
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_SPACE) {
 					lblPassWarn.setText("You can use letters(a-z, A-Z, 0-9), 8-16 characters & periods");
+					txtPassword.setText("");
 				}
 			}
 		});
@@ -255,6 +266,10 @@ public class RegisterScreen extends JFrame {
 		lblBirthday.setBounds(130, 346, 88, 30);
 		panel.add(lblBirthday);
 		JDateChooser txtbirthDate = new JDateChooser();
+
+		JTextFieldDateEditor editor = (JTextFieldDateEditor) txtbirthDate.getDateEditor();
+		editor.setEditable(false);
+		txtbirthDate.setToolTipText("");
 		txtbirthDate.setForeground(new Color(0, 0, 128));
 		txtbirthDate.setBounds(277, 346, 198, 30);
 		panel.add(txtbirthDate);
@@ -271,7 +286,6 @@ public class RegisterScreen extends JFrame {
 		btnSubmit.setForeground(new Color(0, 0, 0));
 		btnSubmit.setFont(new Font("Tahoma", Font.BOLD, 15));
 
-
 		btnSubmit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				Connection conn = null;
@@ -286,6 +300,7 @@ public class RegisterScreen extends JFrame {
 						sd = "";
 					} else {
 						sd = sdf.format(d);
+
 					}
 
 					CheckNull checkNull = new CheckNull();
@@ -293,20 +308,19 @@ public class RegisterScreen extends JFrame {
 					pstInsert = conn.prepareStatement(
 							"insert into users(username,name,password,address,age) values(?,?,?,?,?)");
 
-					String username = checkUserName(txtUserName.getText(), lblUserNamewarn);
-
-					if ((!username.isEmpty()) && checkNull.checkText(txtPassword.getText(), lblPassWarn)
+					if (checkUserName(txtUserName.getText(), lblUserNamewarn)
+							&& checkNull.checkText(txtPassword.getText(), lblPassWarn)
 							&& checkNull.checkText(txtName.getText(), lblNamewarn)
+							&& checkNull.checkText(txtRePassword.getText(), lblRePassWarn)
 							&& checkNull.checkText(txtAddress.getText(), lblAddressWarn)
-							&& checkNull.checkText(txtRePassword.getText(), lblRePassword)
 							&& checkNull.checkText(sd, lblBirthWarn)) {
 
 						UsernameValidator validator = new UsernameValidator();
 						PasswordValidator passValidator = new PasswordValidator();
-						if (validator.Validate(username) && passValidator.validate(txtPassword.getText())
+						if (validator.Validate(txtUserName.getText()) && passValidator.validate(txtPassword.getText())
 								&& txtPassword.getText().equals(txtRePassword.getText())) {
 
-							pstInsert.setString(1, username);
+							pstInsert.setString(1, txtUserName.getText());
 							pstInsert.setString(2, txtName.getText());
 							pstInsert.setString(3, txtPassword.getText());
 							pstInsert.setString(4, txtAddress.getText());
@@ -322,7 +336,7 @@ public class RegisterScreen extends JFrame {
 							setVisible(false);
 
 						} else if (!validator.Validate(txtUserName.getText())) {
-							lblUserNamewarn.setText("You can use letters(a-z, A_Z) & periods");
+							lblUserNamewarn.setText("You can use letters(a-z, A_Z), 4-12 characters & periods");
 						} else if (!passValidator.validate(txtPassword.getText())) {
 							lblPassWarn.setText("You can use letters(a-z, A-Z, 0-9), 8-16 characters & periods");
 						} else if (!txtPassword.getText().equals(txtRePassword.getText())) {
@@ -360,6 +374,7 @@ public class RegisterScreen extends JFrame {
 				txtPassword.setText("");
 				txtRePassword.setText("");
 				txtAddress.setText("");
+				txtbirthDate.setDate(null);
 
 			}
 		});

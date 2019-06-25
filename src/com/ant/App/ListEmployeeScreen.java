@@ -10,8 +10,10 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFRelation;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.ant.Util.FileTypeFilter;
@@ -64,6 +66,15 @@ public class ListEmployeeScreen extends JFrame {
 		}
 	}
 
+	private String getFileExtension(File file) {
+		String name = file.getName();
+		int lastIndexOf = name.lastIndexOf(".");
+		if (lastIndexOf == -1) {
+			return "";
+		}
+		return name.substring(lastIndexOf);
+	}
+
 	private void updatePathData(String path) {
 		Connection conn = null;
 		PreparedStatement statement = null;
@@ -85,7 +96,6 @@ public class ListEmployeeScreen extends JFrame {
 		}
 	}
 
-	@SuppressWarnings("resource")
 	private void showExcelFile(JTable table, DefaultTableModel model, JTextField txtUrl) {
 		Connection conn = null;
 		PreparedStatement statement = null;
@@ -95,42 +105,45 @@ public class ListEmployeeScreen extends JFrame {
 			statement = conn.prepareStatement("SELECT * FROM excelPath");
 
 			res = statement.executeQuery();
-			if (res.next()) {
+			while (res.next()) {
 				String path = res.getString("path");
+				txtUrl.setText(path);
 				File file = new File(path);
 				FileInputStream fis = new FileInputStream(file);
 				XSSFWorkbook workbook = new XSSFWorkbook(fis);
 				Sheet sheet = workbook.getSheetAt(0);
-				txtUrl.setText(path);
+
 				for (Row row : sheet) {
 					int rowNum = row.getRowNum();
 					if (rowNum == 0) {
 
 					} else {
 						int i = 0;
-
 						Vector<Object> data = new Vector<>();
+
 						for (Cell cell : row) {
+
 							data.add(i, cell.getStringCellValue());
 							i++;
-
 						}
-						
+
 						model.addRow(data);
 
 					}
 				}
 
 			}
-		} catch (Exception e) {
-			JOptionPane.showMessageDialog(null, e.getMessage());
-		} finally {
+
+		}catch (Exception e) {
+			JOptionPane.showMessageDialog(null, "Chọn file có dữ liệu dạng text");
+		}
+		finally {
 			try {
 				res.close();
 				statement.close();
 				conn.close();
 			} catch (Exception e2) {
-				JOptionPane.showMessageDialog(null, e2.getMessage());
+				e2.printStackTrace();
 			}
 		}
 
@@ -208,19 +221,25 @@ public class ListEmployeeScreen extends JFrame {
 					fs.setFileFilter(new FileTypeFilter(".xlsx", "Excel file"));
 					int result = fs.showOpenDialog(null);
 					if (result == JFileChooser.APPROVE_OPTION) {
+						File file = fs.getSelectedFile();
+						if (file.exists()
+								&& (getFileExtension(file).equals(".xls") || getFileExtension(file).equals(".xlsx"))) {
+							String excelPath = fs.getSelectedFile().getAbsolutePath();
 
-						String excelPath = fs.getSelectedFile().getAbsolutePath();
-						if (txtUrl.getText().isEmpty()) {
-							addExcelPathData(excelPath);
-							
+							if (txtUrl.getText().isEmpty()) {
+
+								addExcelPathData(excelPath);
+
+							} else {
+								model.getDataVector().removeAllElements();
+								updatePathData(excelPath);
+							}
+							showExcelFile(table, model, txtUrl);
+
 						} else {
-							model.getDataVector().removeAllElements();
-							updatePathData(excelPath);
+							JOptionPane.showMessageDialog(null, "Chọn file excel");
 						}
-						showExcelFile(table, model, txtUrl);
-
 					}
-
 				} catch (Exception ex) {
 					JOptionPane.showMessageDialog(null, ex.getMessage());
 

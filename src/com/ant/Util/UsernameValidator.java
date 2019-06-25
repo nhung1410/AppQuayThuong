@@ -4,7 +4,7 @@ import java.util.regex.Pattern;
 
 public class UsernameValidator {
 	private Pattern pattern;
-	private static final String USERNAME_PATTERN = "^[a-zA-Z]{1,}$";
+	private static final String USERNAME_PATTERN = "^[a-zA-Z]{4,12}$";
 
 	public UsernameValidator() {
 		pattern = Pattern.compile(USERNAME_PATTERN);

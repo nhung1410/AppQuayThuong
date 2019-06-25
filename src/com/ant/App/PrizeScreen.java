@@ -1,6 +1,5 @@
 package com.ant.App;
 
-import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
@@ -76,15 +75,21 @@ public class PrizeScreen extends JFrame {
 			pstInsert = conn.prepareStatement(queryInsert);
 			if (checkNull.checkText(txtTurns.getText(), lblTurnsWarn)
 					&& checkNull.checkText(edtPrize.getText(), lblPrizeWarn)) {
+				TurnsValidator validator = new TurnsValidator();
+				if (validator.Validate(txtTurns.getText())) {
 
 				pstInsert.setString(1, cbbClass.getSelectedItem().toString());
 				pstInsert.setInt(2, Integer.parseInt(txtTurns.getText()));
 				pstInsert.setString(3, edtPrize.getText());
 				pstInsert.setInt(4, 0);
 				pstInsert.executeUpdate();
+				}
+				 else {
+						lblTurnsWarn.setText("Enter number");
+					}
 			}
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(null, e.getMessage());
+			e.printStackTrace();
 		} finally {
 			try {
 				pstInsert.close();
@@ -210,7 +215,7 @@ public class PrizeScreen extends JFrame {
 		model.addColumn("Giải");
 		model.addColumn("Lượt quay");
 		model.addColumn("Phần thưởng");
-		model.addColumn("Lượt quay còn lại");
+		model.addColumn("Số lượt đã quay");
 		model.addColumn("Action");
 		table.setModel(model);
 
@@ -219,19 +224,19 @@ public class PrizeScreen extends JFrame {
 		contentPane.add(editPanel);
 		editPanel.setLayout(null);
 
-		JLabel lblNewLabel = new JLabel("Class");
+		JLabel lblNewLabel = new JLabel("Giải");
 		lblNewLabel.setFont(new Font("Dialog", Font.BOLD, 14));
-		lblNewLabel.setBounds(159, 14, 55, 30);
+		lblNewLabel.setBounds(144, 14, 55, 30);
 		editPanel.add(lblNewLabel);
 
-		JLabel lblTurns = new JLabel("Turns");
+		JLabel lblTurns = new JLabel("Số lượt quay");
 		lblTurns.setFont(new Font("Dialog", Font.BOLD, 14));
-		lblTurns.setBounds(159, 57, 55, 30);
+		lblTurns.setBounds(144, 57, 88, 30);
 		editPanel.add(lblTurns);
 
-		JLabel lblPrize = new JLabel("Prize");
+		JLabel lblPrize = new JLabel("Phần thưởng");
 		lblPrize.setFont(new Font("Dialog", Font.BOLD, 14));
-		lblPrize.setBounds(159, 119, 55, 30);
+		lblPrize.setBounds(144, 121, 97, 30);
 		editPanel.add(lblPrize);
 
 		String[] item = { "Giải ba", "Giải nhì", "Giải nhất" };

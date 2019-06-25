@@ -1,6 +1,5 @@
 package com.ant.App;
 
-import java.awt.BorderLayout;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
@@ -53,7 +52,7 @@ public class LoginScreen extends JFrame {
 		PreparedStatement pst = null;
 		ResultSet rs = null;
 		try {
-			
+
 			conn = SqliteConnection.dbConnector();
 			String query = "select * from users where username=? and password=?";
 			pst = conn.prepareStatement(query);
@@ -63,26 +62,29 @@ public class LoginScreen extends JFrame {
 			boolean flag = false;
 			User us = new User();
 			while (rs.next()) {
+
 				us.setId(rs.getInt("id"));
 				us.setUserName(rs.getString("username"));
 				us.setName(rs.getString("name"));
 				us.setAddress(rs.getString("address"));
 				us.setPassword(rs.getString("password"));
 				flag = true;
+
 			}
 			if (flag) {
 				DashbroadScreen ds = new DashbroadScreen(us);
 				ds.setVisible(true);
 				setVisible(false);
 			} else {
-				lblPasswarning.setText("Wrong username or password. Try again.");
+				JOptionPane.showMessageDialog(null, "Wrong username or password. Try again.");
+
+				lblUserWarning.setText("");
+				lblPasswarning.setText("");
 			}
 
-			
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(null, e.getMessage());
-		}
-		finally {
+		} finally {
 			try {
 				rs.close();
 				pst.close();
@@ -135,7 +137,7 @@ public class LoginScreen extends JFrame {
 		txtPassword.setColumns(10);
 
 		lblPasswarning = new JLabel("");
-		lblPasswarning.setFont(new Font("Dialog", Font.ITALIC, 12));
+		lblPasswarning.setFont(new Font("Dialog", Font.BOLD | Font.ITALIC, 13));
 		lblPasswarning.setForeground(Color.RED);
 		lblPasswarning.setBounds(137, 155, 253, 25);
 		LoginPanel.add(lblPasswarning);
@@ -155,7 +157,6 @@ public class LoginScreen extends JFrame {
 						} else {
 
 							lblPasswarning.setText("Enter Password");
-							lblUserWarning.setText("Wrong username. Try again.");
 						}
 					}
 
